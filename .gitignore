@@ -89,4 +89,4 @@ ENV/
 .ropeproject
 
 # Python bak
-.py.bak
+*.py.bak
