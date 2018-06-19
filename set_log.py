@@ -12,8 +12,7 @@ import logging,os
 import ctypes
 import random
 import sys
-reload(sys)
-sys.setdefaultencoding('utf8')
+
 
 FOREGROUND_WHITE = 0x0007
 FOREGROUND_BLUE = 0x01 # text color contains blue.

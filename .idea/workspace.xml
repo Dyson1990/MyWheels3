@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="cb149dc6-353b-4ec5-996d-92e02f2442f2" name="Default" comment="" />
+    <list default="true" id="cb149dc6-353b-4ec5-996d-92e02f2442f2" name="Default" comment="">
+      <change afterPath="$PROJECT_DIR$/data_analysis/descriptive_analysis.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/MyWheels.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/MyWheels.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mysql_connecter.py" beforeDir="false" afterPath="$PROJECT_DIR$/mysql_connecter.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/set_log.py" beforeDir="false" afterPath="$PROJECT_DIR$/set_log.py" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -14,20 +21,20 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="requests_manager.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="requests_manager.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/requests_manager.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="368">
-              <caret line="86" column="20" lean-forward="true" selection-start-line="86" selection-start-column="20" selection-end-line="86" selection-end-column="20" />
+            <state relative-caret-position="1120">
+              <caret line="70" column="14" selection-start-line="70" selection-start-column="14" selection-end-line="70" selection-end-column="14" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="mysql_connecter.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/mysql_connecter.py">
+      <file leaf-file-name="descriptive_analysis.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/data_analysis/descriptive_analysis.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1136">
-              <caret line="71" column="20" selection-start-line="71" selection-start-column="20" selection-end-line="71" selection-end-column="20" />
+            <state relative-caret-position="496">
+              <caret line="66" selection-start-line="66" selection-end-line="66" />
             </state>
           </provider>
         </entry>
@@ -53,6 +60,8 @@
       <find>:</find>
       <find>=</find>
       <find>ori_data[1]</find>
+      <find>chain</find>
+      <find>std_out_handle</find>
     </findStrings>
     <replaceStrings>
       <replace>target_type</replace>
@@ -92,7 +101,9 @@
         <option value="$PROJECT_DIR$/pandas2sql.py" />
         <option value="$PROJECT_DIR$/xls_manager.py" />
         <option value="$PROJECT_DIR$/requests_manager.py" />
+        <option value="$PROJECT_DIR$/set_log.py" />
         <option value="$PROJECT_DIR$/mysql_connecter.py" />
+        <option value="$PROJECT_DIR$/data_analysis/descriptive_analysis.py" />
       </list>
     </option>
   </component>
@@ -106,7 +117,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -118,11 +128,12 @@
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="settings.editor.selected.configurable" value="vcs.Git" />
+    <property name="settings.editor.selected.configurable" value="fileTemplates" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -141,8 +152,8 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.mysql_connecter">
-    <configuration name="PhantomJS_driver" type="PythonConfigurationType" factoryName="Python" temporary="true">
+  <component name="RunManager" selected="Python.descriptive_analysis">
+    <configuration name="descriptive_analysis" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="MyWheels" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -150,11 +161,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/data_analysis" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/PhantomJS_driver.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/data_analysis/descriptive_analysis.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -236,16 +247,16 @@
       <item itemvalue="Python.driver_manager" />
       <item itemvalue="Python.requests_manager" />
       <item itemvalue="Python.mysql_connecter" />
-      <item itemvalue="Python.PhantomJS_driver" />
       <item itemvalue="Python.plot_manager" />
+      <item itemvalue="Python.descriptive_analysis" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.descriptive_analysis" />
         <item itemvalue="Python.mysql_connecter" />
         <item itemvalue="Python.requests_manager" />
         <item itemvalue="Python.driver_manager" />
         <item itemvalue="Python.plot_manager" />
-        <item itemvalue="Python.PhantomJS_driver" />
       </list>
     </recent_temporary>
   </component>
@@ -385,19 +396,19 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="65" y="-4" width="1535" height="904" extended-state="6" />
+    <frame x="64" y="-11" width="1537" height="912" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.4942717" visible="true" weight="0.23809524" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.4942717" visible="true" weight="0.23809524" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32936078" />
       <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.37121212" />
       <window_info anchor="bottom" id="Version Control" order="7" weight="0.32900432" />
       <window_info anchor="bottom" id="Python Console" order="7" weight="0.46753246" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.36998707" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
-      <window_info anchor="bottom" id="Terminal" order="7" weight="0.32467532" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.39935064" />
+      <window_info anchor="bottom" id="Terminal" order="7" weight="0.32341528" />
       <window_info id="Favorites" order="2" sideWeight="0.5057283" side_tool="true" weight="0.24962178" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.39935064" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -420,16 +431,6 @@
     <option name="LAST_COMMIT_MESSAGE" value="微调" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/PhantomJS_driver.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2016">
-          <caret line="126" column="55" selection-start-line="126" selection-start-column="39" selection-end-line="126" selection-end-column="55" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/PhantomJS_driver.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/html_table_reader.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="560">
@@ -601,17 +602,31 @@
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
     <entry file="file://$PROJECT_DIR$/../re.py" />
+    <entry file="file://$PROJECT_DIR$/set_log.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="368">
+          <caret line="23" column="10" selection-start-line="23" selection-end-line="23" selection-end-column="14" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/mysql_connecter.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1136">
-          <caret line="71" column="20" selection-start-line="71" selection-start-column="20" selection-end-line="71" selection-end-column="20" />
+        <state relative-caret-position="450">
+          <caret line="119" column="27" selection-start-line="119" selection-end-line="120" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/requests_manager.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="368">
-          <caret line="86" column="20" lean-forward="true" selection-start-line="86" selection-start-column="20" selection-end-line="86" selection-end-column="20" />
+        <state relative-caret-position="1120">
+          <caret line="70" column="14" selection-start-line="70" selection-start-column="14" selection-end-line="70" selection-end-column="14" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/data_analysis/descriptive_analysis.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="496">
+          <caret line="66" selection-start-line="66" selection-end-line="66" />
         </state>
       </provider>
     </entry>

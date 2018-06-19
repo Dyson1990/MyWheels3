@@ -8,24 +8,21 @@
     @info: 个人常用代码
 --------------------------------
 """
+import traceback
 
 import pymysql as mysql
 import sys
-reload(sys)
-sys.setdefaultencoding('utf8')
-import set_log
+
+# import set_log
 import pandas as pd
 import numpy as np
 from itertools import chain
+from contextlib import closing
 
 
-#import sqlalchemy
-#import sqlalchemy.ext.declarative
-#import sqlalchemy.orm
-
-log_obj = set_log.Logger('mysql_connecter.log', set_log.logging.WARNING,
-                         set_log.logging.DEBUG)
-log_obj.cleanup('mysql_connecter.log', if_cleanup=True)  # 是否需要在每次运行程序前清空Log文件
+# log_obj = set_log.Logger('mysql_connecter.log', set_log.logging.WARNING,
+#                          set_log.logging.DEBUG)
+# log_obj.cleanup('mysql_connecter.log', if_cleanup=True)  # 是否需要在每次运行程序前清空Log文件
 
 
 class mysql_connecter(object):
@@ -33,33 +30,36 @@ class mysql_connecter(object):
     def __init__(self):
         pass
     
-    def connect(self,sql,args=None,host='localhost',user='spider',password = 'jlspider', dbname = 'spider', charset='utf8'):
+    def connect(self,sql,host,user,password,dbname,charset,args=None):
         """
         :return: list
         """
-        con = ''
+        data = []
         try:
-            con = mysql.connect(host,user,password,dbname,charset = charset)
-            cur = con.cursor()
+            with closing(mysql.connect(host,user,password,dbname,charset = charset)) as con:
+                cur = con.cursor()
             
-            # 多条SQL语句的话，循环执行
-            if isinstance(sql,list):
-                for sql0 in sql:
-                    cur.execute(sql0)
-            else:
-                cur.execute(sql,args)
-                
-            data = cur.fetchall()
-            con.commit()
-            # data.decode('uft8').encode('gbk')
-        finally:
-            if con:
-                #无论如何，连接记得关闭
-                con.close()
-                
+                # 多条SQL语句的话，循环执行
+                if isinstance(sql,list):
+                    for sql0 in sql:
+                        cur.execute(sql0)
+                else:
+                    cur.execute(sql,args)
+
+                data = cur.fetchall()
+                con.commit()
+
+        except:
+            print("数据库交互出错：%s" %traceback.format_exc())
+
+#        finally:
+#            if con:
+#                #无论如何，连接记得关闭
+#                con.close()
+
         return [list(t) for t in data]
 
-    def insert_df_data(self, df, table_name, method='INSERT',host='localhost',user='spider',password = 'jlspider', dbname = 'spider', charset='utf8'):
+    def insert_df_data(self, df, table_name, method,host,user,password,dbname,charset):
         """
         如果在INSERT语句末尾指定了ON DUPLICATE KEY UPDATE，并且插入行后会导致在一个UNIQUE索引或PRIMARY KEY中出现重复值，
         则在出现重复值的行执行UPDATE；如果不会导致唯一值列重复的问题，则插入新行。
@@ -93,7 +93,7 @@ class mysql_connecter(object):
         self.connect(sql, args=data_l, host=host, user=user, password=password, dbname=dbname, charset=charset)
         print("%s successfully !" %method)
 
-    def update_df_data(self, df, table_name, index_name,host='localhost',user='spider',password = 'jlspider', dbname = 'spider', charset='utf8'):
+    def update_df_data(self, df, table_name, index_name,host,user,password,dbname,charset):
         sql = "UPDATE %s \n SET " % table_name
         d = df.to_dict()
         #print d
@@ -113,31 +113,18 @@ class mysql_connecter(object):
 
 if __name__ == '__main__':
     mysql_connecter = mysql_connecter()
-    #print mysql_connecter.connect('select * from actor', dbname = 'sakila')
-    # df = pd.read_csv('C:\\Users\\Administrator\\Desktop\\20171122.csv', dtype=np.str)
-    # df.index = df['fund_code']
-    # print df.head(6)
-    # mysql_connecter.update_df_data(df, 'fund_info', 'fund_code')
-
-    import re
-    df = pd.read_excel('C:\\Users\\Administrator\\Desktop\\公募基金核心库前十持股分类.xlsx', dtype=np.str)
-    # print df
-    drop_l = []
-    for s in df.index:
-        # print s, type(s)
-        if not re.search(r'^\d+$', s):
-            drop_l.append(s)
-    df = df.drop(drop_l, axis=0).drop(['2017年三季度主题','基金名称'], axis=1)
-
-    df = df.rename(columns={'2017年四季度主题':'3rd_class'})
-    df['fund_code'] = df.index
-    df['3rd_class'] = df['3rd_class'].apply(lambda s:None if s == 'nan' else s)
-    # df = df.reset_index()
-    # df = df.fillna(None)
-    print(df)
-    mysql_connecter.insert_df_data(df, 'fund_info', method='UPDATE')
-
-
-"""
-mysql -P 3306 -h rm-bp1ks9kestihy4wy1o.mysql.rds.aliyuncs.com -u test1 -p
-"""
+    mysql_args = {
+        "host": "116.62.230.38",
+        "user": "spider",
+        "password": "startspider",
+        "dbname": "spider",
+        "charset": "utf8"
+    }
+    sql = "SELECT * FROM monitor limit 10"
+    print(mysql_connecter.connect(sql,
+                                  host = mysql_args["host"],
+                                  user = mysql_args["user"],
+                                  password = mysql_args["password"],
+                                  dbname = mysql_args["dbname"],
+                                  charset=mysql_args["charset"]
+                                  ))
