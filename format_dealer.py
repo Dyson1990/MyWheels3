@@ -20,7 +20,7 @@ class format_dealer():
         
     def wxdate2date(self, datetime_dic, end_date_list = [], start_date_list = []):
         """
-        
+        把数据从wxdate转化为datetime数据
         """
         for key in datetime_dic:
             if type(datetime_dic[key]) == type(wx.DateTime_Today()):
