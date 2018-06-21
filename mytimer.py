@@ -17,9 +17,6 @@ import datetime
 # 第一个参数是一个可以返回时间戳的函数，第二个参数可以在定时未到达之前阻塞。
 schedule = sched.scheduler(time.time, time.sleep)
 
-sys.path.append(sys.prefix + "\\Lib\\MyWheels")
-reload(sys)
-sys.setdefaultencoding('utf8')
 start_time = 0
 end_time = 0
 class mytimer(object):

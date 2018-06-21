@@ -22,8 +22,9 @@ class format_dealer():
         """
         把数据从wxdate转化为datetime数据
         """
+        # 确认传入数据的数据类型
         for key in datetime_dic:
-            if type(datetime_dic[key]) == type(wx.DateTime_Today()):
+            if isinstance(datetime_dic[key], type(wx.DateTime_Today())):
                 datetime_dic[key] = datetime.datetime(datetime_dic[key].Year, datetime_dic[key].Month+1,
                                                       datetime_dic[key].Day,datetime_dic[key].Hour,
                                                       datetime_dic[key].Minute,datetime_dic[key].Second)

@@ -13,11 +13,7 @@ import sys
 import bs4
 import pandas as pd
 import numpy as np
-import re
 
-sys.path.append(sys.prefix + "\\Lib\\MyWheels")
-reload(sys)
-sys.setdefaultencoding('utf8')
 
 class html_table_reader(object):
     def __init__(self):
@@ -26,6 +22,7 @@ class html_table_reader(object):
     def table_tr_td(self, e_table, fill_method = None, start_row = 0):
         """
         主要是为了针对有合并单元格的网页table写的，将含有合并单元格的表格放进Dataframe的结果还有待考虑
+        现在暂时不合并单元格
 
         :param e_table: bs4的table元素
         :param fill_method : 参数与fillna()中的method相同，选择填充方式，否则用None
@@ -72,8 +69,8 @@ class html_table_reader(object):
             if has_colspan and fill_method:
                 df.iloc[r,:] = df.iloc[r,:].fillna(method = fill_method)
         # 防止在读写json的时候出现顺序问题
-        #df.index = [str(i) for i in df.index]
-        #df.columns = [str(i) for i in df.columns]
+        # df.index = [str(i) for i in df.index]
+        # df.columns = [str(i) for i in df.columns]
         if df.empty:
             df = pd.read_html(e_table.prettify(), encoding='utf8')
         return df
@@ -95,6 +92,7 @@ class html_table_reader(object):
         return df
 
     def data_standardize(self, df, delimiter=r'/\n/'):
+        # 若数据行r存在空白单元格，则与r-1行的数据合并
         for r in range(df.shape[0]-1, 0, -1):
             if df.iloc[r,:].hasnans:
                 df.iloc[r-1, :] = df.iloc[r-1, :] + (delimiter + df.iloc[r, :]).fillna('')
@@ -103,6 +101,7 @@ class html_table_reader(object):
         return df
 
     def standardize(self, df, delimiter=r'/\n/', b0 = True):
+        # 将标题行和数据行全部标准化
         df = self.title_standardize(df, delimiter, b0)
         df = self.data_standardize(df, delimiter)
 
@@ -111,70 +110,4 @@ class html_table_reader(object):
 
 
 if __name__ == '__main__':
-    s = """
-<table cellpadding="0" cellspacing="0" border="0">
-					<tbody><tr style="color:#ffffff;">
-						<td width="35px" class="xz_line" height="24px" bgcolor="#8BB3D7" align="center">序号</td><td width="805px" class="xz_line" bgcolor="#8BB3D7" align="center">文件名</td><td width="48px" bgcolor="#8BB3D7" align="center">下载</td>
-					</tr>
-					
-					 
-						<tr>
-							<td class="xz_line" height="24px" bgcolor="#FAFAFA" align="center">1</td><td class="xz_line" bgcolor="#FAFAFA" align="left">10号工业挂牌出让文件.doc</td><td bgcolor="#FAFAFA" align="center">
-							<a href="#" onclick="isLogin('1333','10号工业挂牌出让文件.doc');" cssclass="xz_pic">
-								<img src="images/list_09.jpg" title="点击下载" alt="点击下载">
-							</a></td>
-						<!-- 	
-								
-								
-							
-							<a href=" download?RECORDID=1333&amp;fileName=10%BA%C5%B9%A4%D2%B5%B9%D2%C5%C6%B3%F6%C8%C3%CE%C4%BC%FE.doc" class="xz_pic"><img src="images/list_09.jpg" title="点击下载" alt="点击下载" /></a></td>
-						 -->
-						</tr>
-					 
-					
-					 
-						<tr>
-							<td class="xz_line" height="24px" bgcolor="#FAFAFA" align="center">2</td><td class="xz_line" bgcolor="#FAFAFA" align="left">挂牌授权委托书和法定代表人证明书.doc</td><td bgcolor="#FAFAFA" align="center">
-							<a href="#" onclick="isLogin('1244','挂牌授权委托书和法定代表人证明书.doc');" cssclass="xz_pic">
-								<img src="images/list_09.jpg" title="点击下载" alt="点击下载">
-							</a></td>
-						<!-- 	
-								
-								
-							
-							<a href=" download?RECORDID=1244&amp;fileName=%B9%D2%C5%C6%CA%DA%C8%A8%CE%AF%CD%D0%CA%E9%BA%CD%B7%A8%B6%A8%B4%FA%B1%ED%C8%CB%D6%A4%C3%F7%CA%E9.doc" class="xz_pic"><img src="images/list_09.jpg" title="点击下载" alt="点击下载" /></a></td>
-						 -->
-						</tr>
-					 
-					
-					 
-						<tr>
-							<td class="xz_line" height="24px" bgcolor="#FAFAFA" align="center">3</td><td class="xz_line" bgcolor="#FAFAFA" align="left">象山经济开发区城东工业园工业待出让C-2-07-01地块规划设计条件.pdf</td><td bgcolor="#FAFAFA" align="center">
-							<a href="#" onclick="isLogin('1245','象山经济开发区城东工业园工业待出让C-2-07-01地块规划设计条件.pdf');" cssclass="xz_pic">
-								<img src="images/list_09.jpg" title="点击下载" alt="点击下载">
-							</a></td>
-						<!-- 	
-								
-								
-							
-							<a href=" download?RECORDID=1245&amp;fileName=%CF%F3%C9%BD%BE%AD%BC%C3%BF%AA%B7%A2%C7%F8%B3%C7%B6%AB%B9%A4%D2%B5%D4%B0%B9%A4%D2%B5%B4%FD%B3%F6%C8%C3C-2-07-01%B5%D8%BF%E9%B9%E6%BB%AE%C9%E8%BC%C6%CC%F5%BC%FE.pdf" class="xz_pic"><img src="images/list_09.jpg" title="点击下载" alt="点击下载" /></a></td>
-						 -->
-						</tr>
-					 
-					
-				</tbody></table>"""
-    #html_table_reader = html_table_reader()
-    #df = html_table_reader.table_tr_td(s,None)
-    #df.to_csv('df.csv', encoding='utf_8_sig')
-    #print df
-    #print df.empty
-    #print df.iloc[0,0].replace(u'\xa0','')
-    #print html_table_reader.standardize(df)
-    #print pd.read_html(s,encoding='utf8')
-
-    bs_obj = bs4.BeautifulSoup(s,'html.parser')
-    e_table = bs_obj.find('table')
-    e_tr = e_table.find_all('tr')[-1]
-    print(e_tr)
-    #print e_tr.string
-    #print e_tr.a.string
+    html_table_reader = html_table_reader()

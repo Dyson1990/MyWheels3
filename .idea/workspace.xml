@@ -3,7 +3,11 @@
   <component name="ChangeListManager">
     <list default="true" id="cb149dc6-353b-4ec5-996d-92e02f2442f2" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PhantomJS_driver.py" beforeDir="false" afterPath="$PROJECT_DIR$/abandoned/PhantomJS_driver.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/driver_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/driver_manager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/format_dealer.py" beforeDir="false" afterPath="$PROJECT_DIR$/format_dealer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/func_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/abandoned/func_manager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/html_table_reader.py" beforeDir="false" afterPath="$PROJECT_DIR$/html_table_reader.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mysql_connecter.py" beforeDir="false" afterPath="$PROJECT_DIR$/mysql_connecter.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -17,29 +21,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="requests_manager.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/requests_manager.py">
+      <file leaf-file-name="mysql_connecter.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/mysql_connecter.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1120">
-              <caret line="70" column="14" selection-start-line="70" selection-start-column="14" selection-end-line="70" selection-end-column="14" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="descriptive_analysis.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/data_analysis/descriptive_analysis.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="368">
-              <caret line="40" column="26" lean-forward="true" selection-start-line="40" selection-start-column="26" selection-end-line="40" selection-end-column="26" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="driver_manager.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/driver_manager.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="230">
-              <caret line="124" column="24" lean-forward="true" selection-start-line="124" selection-start-column="24" selection-end-line="124" selection-end-column="24" />
+            <state relative-caret-position="240">
+              <caret line="46" column="39" selection-start-line="46" selection-start-column="39" selection-end-line="46" selection-end-column="39" />
             </state>
           </provider>
         </entry>
@@ -87,7 +73,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/func_manager.py" />
         <option value="$PROJECT_DIR$/decision_tree.py" />
         <option value="$USER_HOME$/Desktop/spider/spidertest - 副本 (4) - 副本.py" />
         <option value="$USER_HOME$/Desktop/spider/spidertest - 副本.py" />
@@ -101,14 +86,16 @@
         <option value="$PROJECT_DIR$/url.txt" />
         <option value="$PROJECT_DIR$/csv_report.py" />
         <option value="$PROJECT_DIR$/dir_tree.py" />
-        <option value="$PROJECT_DIR$/driver_manager.py" />
-        <option value="$PROJECT_DIR$/html_table_reader.py" />
         <option value="$PROJECT_DIR$/pandas2sql.py" />
         <option value="$PROJECT_DIR$/xls_manager.py" />
         <option value="$PROJECT_DIR$/requests_manager.py" />
         <option value="$PROJECT_DIR$/set_log.py" />
-        <option value="$PROJECT_DIR$/mysql_connecter.py" />
         <option value="$PROJECT_DIR$/data_analysis/descriptive_analysis.py" />
+        <option value="$PROJECT_DIR$/format_dealer.py" />
+        <option value="$PROJECT_DIR$/func_manager.py" />
+        <option value="$PROJECT_DIR$/html_table_reader.py" />
+        <option value="$PROJECT_DIR$/driver_manager.py" />
+        <option value="$PROJECT_DIR$/mysql_connecter.py" />
       </list>
     </option>
   </component>
@@ -141,119 +128,12 @@
     <property name="settings.editor.selected.configurable" value="fileTemplates" />
   </component>
   <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/abandoned" />
+    </key>
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Python27\Lib\MyWheels" />
     </key>
-  </component>
-  <component name="RestoreUpdateTree" date="Moments ago" ActionInfo="_Update">
-    <UpdatedFiles>
-      <FILE-GROUP>
-        <option name="myUpdateName" value="Updated from server" />
-        <option name="myStatusName" value="Changed on server" />
-        <option name="mySupportsDeletion" value="false" />
-        <option name="myCanBeAbsent" value="false" />
-        <option name="myId" value="CHANGED_ON_SERVER" />
-        <FILE-GROUP>
-          <option name="myUpdateName" value="Updated" />
-          <option name="myStatusName" value="Changed" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" value="UPDATED" />
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/driver_manager.py</PATH>
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" value="Created" />
-          <option name="myStatusName" value="Created" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" value="CREATED" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" value="Deleted" />
-          <option name="myStatusName" value="Deleted" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="true" />
-          <option name="myId" value="REMOVED_FROM_REPOSITORY" />
-        </FILE-GROUP>
-        <FILE-GROUP>
-          <option name="myUpdateName" value="Restored" />
-          <option name="myStatusName" value="Will be restored" />
-          <option name="mySupportsDeletion" value="false" />
-          <option name="myCanBeAbsent" value="false" />
-          <option name="myId" value="RESTORED" />
-        </FILE-GROUP>
-      </FILE-GROUP>
-      <FILE-GROUP>
-        <option name="myUpdateName" value="Modified" />
-        <option name="myStatusName" value="Modified" />
-        <option name="mySupportsDeletion" value="false" />
-        <option name="myCanBeAbsent" value="false" />
-        <option name="myId" value="MODIFIED" />
-      </FILE-GROUP>
-      <FILE-GROUP>
-        <option name="myUpdateName" value="Skipped" />
-        <option name="myStatusName" value="Skipped" />
-        <option name="mySupportsDeletion" value="false" />
-        <option name="myCanBeAbsent" value="false" />
-        <option name="myId" value="SKIPPED" />
-      </FILE-GROUP>
-      <FILE-GROUP>
-        <option name="myUpdateName" value="Merged with conflicts" />
-        <option name="myStatusName" value="Will be merged with conflicts" />
-        <option name="mySupportsDeletion" value="false" />
-        <option name="myCanBeAbsent" value="false" />
-        <option name="myId" value="MERGED_WITH_CONFLICTS" />
-      </FILE-GROUP>
-      <FILE-GROUP>
-        <option name="myUpdateName" value="Merged with tree conflicts" />
-        <option name="myStatusName" value="Merged with tree conflicts" />
-        <option name="mySupportsDeletion" value="false" />
-        <option name="myCanBeAbsent" value="false" />
-        <option name="myId" value="MERGED_WITH_TREE_CONFLICT" />
-      </FILE-GROUP>
-      <FILE-GROUP>
-        <option name="myUpdateName" value="Merged with property conflicts" />
-        <option name="myStatusName" value="Will be merged with property conflicts" />
-        <option name="mySupportsDeletion" value="false" />
-        <option name="myCanBeAbsent" value="false" />
-        <option name="myId" value="MERGED_WITH_PROPERTY_CONFLICT" />
-      </FILE-GROUP>
-      <FILE-GROUP>
-        <option name="myUpdateName" value="Merged" />
-        <option name="myStatusName" value="Will be merged" />
-        <option name="mySupportsDeletion" value="false" />
-        <option name="myCanBeAbsent" value="false" />
-        <option name="myId" value="MERGED" />
-      </FILE-GROUP>
-      <FILE-GROUP>
-        <option name="myUpdateName" value="Not in repository" />
-        <option name="myStatusName" value="Not in repository" />
-        <option name="mySupportsDeletion" value="true" />
-        <option name="myCanBeAbsent" value="false" />
-        <option name="myId" value="UNKNOWN" />
-      </FILE-GROUP>
-      <FILE-GROUP>
-        <option name="myUpdateName" value="Locally added" />
-        <option name="myStatusName" value="Locally added" />
-        <option name="mySupportsDeletion" value="false" />
-        <option name="myCanBeAbsent" value="false" />
-        <option name="myId" value="LOCALLY_ADDED" />
-      </FILE-GROUP>
-      <FILE-GROUP>
-        <option name="myUpdateName" value="Locally removed" />
-        <option name="myStatusName" value="Locally removed" />
-        <option name="mySupportsDeletion" value="false" />
-        <option name="myCanBeAbsent" value="false" />
-        <option name="myId" value="LOCALLY_REMOVED" />
-      </FILE-GROUP>
-      <FILE-GROUP>
-        <option name="myUpdateName" value="Switched" />
-        <option name="myStatusName" value="Switched" />
-        <option name="mySupportsDeletion" value="false" />
-        <option name="myCanBeAbsent" value="false" />
-        <option name="myId" value="SWITCHED" />
-      </FILE-GROUP>
-    </UpdatedFiles>
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -267,7 +147,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.descriptive_analysis">
+  <component name="RunManager" selected="Python.mysql_connecter">
     <configuration name="descriptive_analysis" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="MyWheels" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -367,8 +247,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.descriptive_analysis" />
         <item itemvalue="Python.mysql_connecter" />
+        <item itemvalue="Python.descriptive_analysis" />
         <item itemvalue="Python.requests_manager" />
         <item itemvalue="Python.driver_manager" />
         <item itemvalue="Python.plot_manager" />
@@ -520,16 +400,16 @@
   <component name="ToolWindowManager">
     <frame x="64" y="-11" width="1537" height="912" extended-state="6" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.4942717" visible="true" weight="0.23809524" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.4942717" visible="true" weight="0.23809524" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32936078" />
-      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.5006614" side_tool="true" visible="true" weight="0.32341528" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.36998707" />
+      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.5006614" side_tool="true" visible="true" weight="0.3221216" />
       <window_info anchor="bottom" id="Version Control" order="7" weight="0.32900432" />
       <window_info anchor="bottom" id="Python Console" order="7" weight="0.46753246" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49933863" weight="0.36998707" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
-      <window_info anchor="bottom" id="Terminal" order="7" sideWeight="0.49933863" visible="true" weight="0.32341528" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.39935064" />
+      <window_info anchor="bottom" id="Terminal" order="7" sideWeight="0.49603173" weight="0.32258064" />
       <window_info id="Favorites" order="2" sideWeight="0.5057283" side_tool="true" weight="0.24962178" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.39935064" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -674,22 +554,8 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/func_manager.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="46">
-          <caret line="57" column="38" selection-start-line="57" selection-start-column="38" selection-end-line="57" selection-end-column="38" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Logistic_regression.py" />
     <entry file="file://$PROJECT_DIR$/merge_data.py" />
-    <entry file="file://$PROJECT_DIR$/html_table_reader.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="368">
-          <caret line="37" column="6" selection-start-line="37" selection-start-column="6" selection-end-line="37" selection-end-column="6" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/MySQL_reader.py" />
     <entry file="file://$PROJECT_DIR$/pandas2sql.py" />
     <entry file="file://$PROJECT_DIR$/mytimer.py">
@@ -713,9 +579,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/format_dealer.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/../re.py" />
     <entry file="file://$PROJECT_DIR$/set_log.py">
       <provider selected="true" editor-type-id="text-editor">
@@ -724,31 +587,52 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/mysql_connecter.py">
+    <entry file="file://$PROJECT_DIR$/data_analysis/descriptive_analysis.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="450">
-          <caret line="119" column="27" selection-start-line="119" selection-end-line="120" />
+        <state relative-caret-position="16">
+          <caret line="40" column="26" selection-start-line="40" selection-start-column="26" selection-end-line="40" selection-end-column="26" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/requests_manager.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1120">
+        <state relative-caret-position="16">
           <caret line="70" column="14" selection-start-line="70" selection-start-column="14" selection-end-line="70" selection-end-column="14" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/data_analysis/descriptive_analysis.py">
+    <entry file="file://$PROJECT_DIR$/abandoned/func_manager.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="368">
-          <caret line="40" column="26" lean-forward="true" selection-start-line="40" selection-start-column="26" selection-end-line="40" selection-end-column="26" />
+        <state relative-caret-position="192">
+          <caret line="33" column="23" selection-start-line="33" selection-start-column="23" selection-end-line="33" selection-end-column="23" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/html_table_reader.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-58">
+          <caret line="15" selection-start-line="15" selection-end-line="15" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/driver_manager.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="230">
-          <caret line="124" column="24" lean-forward="true" selection-start-line="124" selection-start-column="24" selection-end-line="124" selection-end-column="24" />
+        <state relative-caret-position="240">
+          <caret line="15" selection-start-line="15" selection-end-line="15" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/format_dealer.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="720">
+          <caret line="45" selection-start-line="45" selection-end-line="45" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/mysql_connecter.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="240">
+          <caret line="46" column="39" selection-start-line="46" selection-start-column="39" selection-end-line="46" selection-end-column="39" />
         </state>
       </provider>
     </entry>

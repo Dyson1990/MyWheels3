@@ -13,18 +13,9 @@ import os
 import traceback
 
 import selenium.webdriver
-import bs4
+
 import random
-#import pyvirtualdisplay
-import time
-from selenium.webdriver.common.keys import Keys
 
-from selenium.webdriver import ActionChains
-
-sys.path.append(sys.prefix + "\\Lib\\MyWheels")
-reload(sys)
-sys.setdefaultencoding('utf8')
-import requests
 
 
 
