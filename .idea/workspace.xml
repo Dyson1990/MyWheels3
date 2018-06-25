@@ -3,11 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="cb149dc6-353b-4ec5-996d-92e02f2442f2" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/driver_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/driver_manager.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/format_dealer.py" beforeDir="false" afterPath="$PROJECT_DIR$/format_dealer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/func_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/abandoned/func_manager.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/html_table_reader.py" beforeDir="false" afterPath="$PROJECT_DIR$/html_table_reader.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mysql_connecter.py" beforeDir="false" afterPath="$PROJECT_DIR$/mysql_connecter.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -24,8 +19,8 @@
       <file leaf-file-name="mysql_connecter.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/mysql_connecter.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="240">
-              <caret line="46" column="39" selection-start-line="46" selection-start-column="39" selection-end-line="46" selection-end-column="39" />
+            <state relative-caret-position="304">
+              <caret line="50" column="40" selection-start-line="50" selection-start-column="40" selection-end-line="50" selection-end-column="40" />
             </state>
           </provider>
         </entry>
@@ -385,7 +380,14 @@
       <option name="project" value="LOCAL" />
       <updated>1529401003192</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="python3 update">
+      <created>1529559609161</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1529559609162</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="TodoView">
@@ -398,18 +400,18 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="64" y="-11" width="1537" height="912" extended-state="6" />
+    <frame x="65" y="-4" width="1535" height="904" extended-state="6" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" sideWeight="0.4942717" visible="true" weight="0.23809524" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32936078" />
       <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.5006614" side_tool="true" visible="true" weight="0.3221216" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49933863" weight="0.36998707" />
       <window_info anchor="bottom" id="Version Control" order="7" weight="0.32900432" />
       <window_info anchor="bottom" id="Python Console" order="7" weight="0.46753246" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49933863" weight="0.36998707" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="bottom" id="Terminal" order="7" sideWeight="0.49603173" weight="0.32258064" />
-      <window_info id="Favorites" order="2" sideWeight="0.5057283" side_tool="true" weight="0.24962178" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39935064" />
+      <window_info id="Favorites" order="2" sideWeight="0.5057283" side_tool="true" weight="0.24962178" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -430,7 +432,8 @@
     <MESSAGE value="add new" />
     <MESSAGE value="微调" />
     <MESSAGE value="save" />
-    <option name="LAST_COMMIT_MESSAGE" value="save" />
+    <MESSAGE value="python3 update" />
+    <option name="LAST_COMMIT_MESSAGE" value="python3 update" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/html_table_reader.py">
@@ -565,13 +568,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/plot_manager.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="631">
-          <caret line="53" column="24" selection-start-line="53" selection-start-column="24" selection-end-line="53" selection-end-column="24" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/plot_manager.py" />
     <entry file="file://$PROJECT_DIR$/xls_manager.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="496">
@@ -631,8 +628,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/mysql_connecter.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="240">
-          <caret line="46" column="39" selection-start-line="46" selection-start-column="39" selection-end-line="46" selection-end-column="39" />
+        <state relative-caret-position="304">
+          <caret line="50" column="40" selection-start-line="50" selection-start-column="40" selection-end-line="50" selection-end-column="40" />
         </state>
       </provider>
     </entry>
