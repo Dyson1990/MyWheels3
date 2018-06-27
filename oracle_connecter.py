@@ -37,6 +37,8 @@ class oracle_connecter(object):
 
         oracle_args = self.standardize_args(oracle_args)
 
+        os.environ['NLS_LANG'] = 'SIMPLIFIED CHINESE_CHINA.UTF8'
+
         try:
 
             # con0 = cx_Oracle.connect("%s/%s@%s:%s/%s" %(oracle_args['user']
@@ -105,5 +107,12 @@ if __name__ == '__main__':
         , 'host': 'localhost'
         , 'sid': 'XE'
         , 'dbname': 'HR'}
-
     print(oracle_connecter.connect('SELECT * FROM JOBS', oracle_args))
+
+    # 服务器测试
+    # oracle_args = {'user': 'VW_NOV06'
+    #     , 'password': 'C372M5c590'
+    #     , 'host': '172.17.32.2'
+    #     , 'sid': 'orcl'
+    #     , 'dbname': 'CDB_NOV'}
+    # print(oracle_connecter.connect('SELECT * FROM F_QY_JBXX WHERE ROWNUM <= 10', oracle_args))
