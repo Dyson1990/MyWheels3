@@ -3,7 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="cb149dc6-353b-4ec5-996d-92e02f2442f2" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mysql_connecter.py" beforeDir="false" afterPath="$PROJECT_DIR$/mysql_connecter.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/oracle_connecter.py" beforeDir="false" afterPath="$PROJECT_DIR$/oracle_connecter.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -20,8 +20,8 @@
       <file leaf-file-name="mysql_connecter.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/mysql_connecter.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="269">
-              <caret line="166" selection-start-line="166" selection-end-line="166" />
+            <state relative-caret-position="288">
+              <caret line="165" selection-start-line="165" selection-end-line="165" />
             </state>
           </provider>
         </entry>
@@ -29,8 +29,8 @@
       <file leaf-file-name="oracle_connecter.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/oracle_connecter.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="349">
-              <caret line="104" column="26" lean-forward="true" selection-start-line="104" selection-start-column="26" selection-end-line="104" selection-end-column="26" />
+            <state relative-caret-position="272">
+              <caret line="79" column="30" lean-forward="true" selection-start-line="79" selection-start-column="30" selection-end-line="79" selection-end-column="30" />
             </state>
           </provider>
         </entry>
@@ -100,8 +100,8 @@
         <option value="$PROJECT_DIR$/func_manager.py" />
         <option value="$PROJECT_DIR$/html_table_reader.py" />
         <option value="$PROJECT_DIR$/driver_manager.py" />
-        <option value="$PROJECT_DIR$/oracle_connecter.py" />
         <option value="$PROJECT_DIR$/mysql_connecter.py" />
+        <option value="$PROJECT_DIR$/oracle_connecter.py" />
       </list>
     </option>
   </component>
@@ -154,7 +154,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.mysql_connecter">
+  <component name="RunManager" selected="Python.oracle_connecter">
     <configuration name="descriptive_analysis" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="MyWheels" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -209,7 +209,7 @@
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
     </configuration>
-    <configuration name="plot_manager" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="oracle_connecter" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="MyWheels" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -221,7 +221,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/plot_manager.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/oracle_connecter.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -249,16 +249,16 @@
       <item itemvalue="Python.driver_manager" />
       <item itemvalue="Python.requests_manager" />
       <item itemvalue="Python.mysql_connecter" />
-      <item itemvalue="Python.plot_manager" />
       <item itemvalue="Python.descriptive_analysis" />
+      <item itemvalue="Python.oracle_connecter" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.oracle_connecter" />
         <item itemvalue="Python.mysql_connecter" />
         <item itemvalue="Python.descriptive_analysis" />
         <item itemvalue="Python.requests_manager" />
         <item itemvalue="Python.driver_manager" />
-        <item itemvalue="Python.plot_manager" />
       </list>
     </recent_temporary>
   </component>
@@ -420,7 +420,14 @@
       <option name="project" value="LOCAL" />
       <updated>1530071665946</updated>
     </task>
-    <option name="localTasksCounter" value="22" />
+    <task id="LOCAL-00022" summary="python3 update">
+      <created>1530079483451</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1530079483451</updated>
+    </task>
+    <option name="localTasksCounter" value="23" />
     <servers />
   </component>
   <component name="TodoView">
@@ -436,12 +443,12 @@
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.4942717" visible="true" weight="0.23761855" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.4942717" visible="true" weight="0.23761855" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32936078" />
-      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.5006614" side_tool="true" visible="true" weight="0.3217768" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49933863" weight="0.36998707" />
+      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.50105375" side_tool="true" weight="0.36944744" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49894625" weight="0.36944744" />
       <window_info anchor="bottom" id="Version Control" order="7" weight="0.32900432" />
-      <window_info anchor="bottom" id="Python Console" order="7" weight="0.46753246" />
+      <window_info active="true" anchor="bottom" id="Python Console" order="7" visible="true" weight="0.46695557" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="bottom" id="Terminal" order="7" sideWeight="0.49603173" weight="0.32258064" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39935064" />
@@ -655,15 +662,15 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/mysql_connecter.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="269">
-          <caret line="166" selection-start-line="166" selection-end-line="166" />
+        <state relative-caret-position="288">
+          <caret line="165" selection-start-line="165" selection-end-line="165" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/oracle_connecter.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="349">
-          <caret line="104" column="26" lean-forward="true" selection-start-line="104" selection-start-column="26" selection-end-line="104" selection-end-column="26" />
+        <state relative-caret-position="272">
+          <caret line="79" column="30" lean-forward="true" selection-start-line="79" selection-start-column="30" selection-end-line="79" selection-end-column="30" />
         </state>
       </provider>
     </entry>

@@ -22,12 +22,14 @@ import traceback
 #                         set_log.logging.DEBUG)
 #log_obj.cleanup('oracle_connecter.log', if_cleanup = True)  # 是否需要在每次运行程序前清空Log文件
 
+print('cx_Oracle.version: ' + cx_Oracle.version)
+
 class oracle_connecter(object):
 
     def __init__(self):
         pass
 
-    def connect(self, sql, oracle_args, args=None):
+    def connect(self, sql, oracle_args, args=None, fetch_num=1):
         """
         最常用的连接MySQL的方式
         sql 可以是一条sql语句， 也可以是sql语句组成的列表
@@ -71,7 +73,15 @@ class oracle_connecter(object):
                     else:
                         cur.execute(sql)
 
-                data = cur.fetchall()
+                # 若cx_Oracle版本比较低，一次能获取的数据有限制，保险起见每次只取一条
+                if float(cx_Oracle.version) < 6.0:
+                    data = []
+                    res = True
+                    while res:
+                        res = cur.fetchmany(fetch_num)
+                        data.extend(res)
+                else:
+                    data = cur.fetchall()
                 con.commit()
 
         except:
