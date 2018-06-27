@@ -29,12 +29,14 @@ class oracle_connecter(object):
     def __init__(self):
         pass
 
-    def connect(self, sql, oracle_args, args=None, fetch_num=1):
+    def connect(self, sql, oracle_args, args=None):
         """
         最常用的连接MySQL的方式
         sql 可以是一条sql语句， 也可以是sql语句组成的列表
 
-        ps：暂时只支持SID登录，服务名登录测试失败
+        ps：
+        1.暂时只支持SID登录，服务名登录测试失败
+        2.若存在CLOB格式的数据，SQL中需要用to_char
 
         :return: list
         """
@@ -74,14 +76,16 @@ class oracle_connecter(object):
                         cur.execute(sql)
 
                 # 若cx_Oracle版本比较低，一次能获取的数据有限制，保险起见每次只取一条
-                if float(cx_Oracle.version) < 6.0:
-                    data = []
-                    res = True
-                    while res:
-                        res = cur.fetchmany(fetch_num)
-                        data.extend(res)
-                else:
-                    data = cur.fetchall()
+                # if float(cx_Oracle.version) < 6.0:
+                #     data = []
+                #     res = True
+                #     while res:
+                #         res = cur.fetchone()
+                #         data.append(res)
+                #     data = data[:-1] # 剔除最后一个None，以免报错
+                # else:
+
+                data = cur.fetchall()
                 con.commit()
 
         except:
@@ -91,8 +95,24 @@ class oracle_connecter(object):
     #            if con:
     #                #无论如何，连接记得关闭
     #                con.close()
-
         return [list(t) for t in data]
+
+    def df_output(self, sql, oracle_args):
+        # 用pandas来从MySQL读取数据
+
+        oracle_args = self.standardize_args(oracle_args)
+        os.environ['NLS_LANG'] = 'SIMPLIFIED CHINESE_CHINA.%s' %oracle_args['charset']
+
+        dsn = cx_Oracle.makedsn(oracle_args['host'], oracle_args['port'], sid = oracle_args['sid']) # , service_name=oracle_args['sevicename']
+        con0 = cx_Oracle.connect(user = oracle_args['user'], password = oracle_args['password'], dsn=dsn)
+
+        with closing(con0) as conn:
+            cur = conn.cursor()
+            cur.execute("ALTER SESSION SET CURRENT_SCHEMA = \"%s\"" % oracle_args['dbname'])
+
+            df = pd.read_sql(sql, conn)
+
+        return df
 
     def standardize_args(self, oracle_args):
         # 检查所需参数是否都存在
@@ -125,6 +145,8 @@ if __name__ == '__main__':
         , 'sid': 'XE'
         , 'dbname': 'HR'}
     print(oracle_connecter.connect('SELECT * FROM JOBS', oracle_args))
+    print(oracle_connecter.df_output('SELECT * FROM JOBS', oracle_args))
+
 
     # 服务器测试
     # oracle_args = {'user': 'VW_NOV06'

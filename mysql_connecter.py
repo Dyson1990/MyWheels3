@@ -10,7 +10,7 @@
 """
 import traceback
 
-import pymysql as mysql
+import pymysql
 import sys
 
 import pandas as pd
@@ -40,12 +40,12 @@ class mysql_connecter(object):
         mysql_args = self.standardize_args(mysql_args)
 
         try:
-            with closing(mysql.connect(mysql_args['host'],
+            with closing(pymysql.connect(mysql_args['host'],
                                        mysql_args['user'],
                                        mysql_args['password'],
                                        mysql_args['dbname'],
-                                       charset = mysql_args['charset'])) as con:
-                cur = con.cursor()
+                                       charset = mysql_args['charset'])) as conn:
+                cur = conn.cursor()
             
                 # 多条SQL语句的话，循环执行
                 if isinstance(sql,list):
@@ -55,7 +55,7 @@ class mysql_connecter(object):
                     cur.execute(sql,args)
 
                 data = cur.fetchall()
-                con.commit()
+                conn.commit()
 
         except:
             print("数据库交互出错：%s" %traceback.format_exc())
@@ -66,6 +66,20 @@ class mysql_connecter(object):
 #                con.close()
 
         return [list(t) for t in data]
+
+    def df_output(self, sql, mysql_args):
+        # 用pandas来从MySQL读取数据
+
+        mysql_args = self.standardize_args(mysql_args)
+
+        with closing(pymysql.connect(mysql_args['host'],
+                                     mysql_args['user'],
+                                     mysql_args['password'],
+                                     mysql_args['dbname'],
+                                     charset=mysql_args['charset'])) as conn:
+            df = pd.read_sql(sql, conn)
+
+        return df
 
     def insert_df_data(self, df, table_name, mysql_args, method="INSERT", fill_na=None):
         """
