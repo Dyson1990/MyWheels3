@@ -79,6 +79,8 @@ class mysql_connecter(object):
         :param method:
 
         :return:
+
+        举例说明
          
         df:
                A      B      C
@@ -91,7 +93,7 @@ class mysql_connecter(object):
 
         """
         # 是否需要补全缺失值
-        if fillna0 != None:
+        if fill_na != None:
             df = df.fillna(fill_na)
 
         # 以df的列名作为INSERT语句中的表格字段名
@@ -116,6 +118,7 @@ class mysql_connecter(object):
 
     def update_df_data(self, df, table_name, index_name, mysql_args, fill_na=None):
         """
+        举例说明
         df:
                A      B      C
         1   23.0  213.0    NaN
@@ -160,6 +163,7 @@ class mysql_connecter(object):
         print("UPDATE successfully !")
 
     def standardize_args(self, mysql_args):
+        # 检查所需参数是否都存在
 
         if not isinstance(mysql_args, dict):
             raise Exception("mysql_args格式错误！！！")
