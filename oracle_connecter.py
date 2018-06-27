@@ -31,13 +31,16 @@ class oracle_connecter(object):
         """
         最常用的连接MySQL的方式
         sql 可以是一条sql语句， 也可以是sql语句组成的列表
+
+        ps：暂时只支持SID登录，服务名登录测试失败
+
         :return: list
         """
         data = []
 
         oracle_args = self.standardize_args(oracle_args)
 
-        os.environ['NLS_LANG'] = 'SIMPLIFIED CHINESE_CHINA.UTF8'
+        os.environ['NLS_LANG'] = 'SIMPLIFIED CHINESE_CHINA.%s' %oracle_args['charset']
 
         try:
 
@@ -62,10 +65,10 @@ class oracle_connecter(object):
                     for sql0 in sql:
                         cur.execute(sql0)
                 else:
+                    # 待确定，execute函数应该是可以传入args=None的
                     if args:
                         cur.execute(sql, args)
                     else:
-                        print(sql)
                         cur.execute(sql)
 
                 data = cur.fetchall()
@@ -92,8 +95,12 @@ class oracle_connecter(object):
         if check_args:
             raise Exception("缺少数据库参数：%s" % '，'.join(check_args))
 
+        # 设置默认参数
+
         if 'port' not in oracle_args:
             oracle_args['port'] = '1521'
+        if 'charset' not in oracle_args:
+            oracle_args['charset'] = 'UTF8'
 
         return oracle_args
 
