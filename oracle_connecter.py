@@ -47,15 +47,7 @@ class oracle_connecter(object):
         os.environ['NLS_LANG'] = 'SIMPLIFIED CHINESE_CHINA.%s' %oracle_args['charset']
 
         try:
-
-            # con0 = cx_Oracle.connect("%s/%s@%s:%s/%s" %(oracle_args['user']
-            #                                         , oracle_args['password']
-            #                                         , oracle_args['host']
-            #                                         , oracle_args['port']
-            #                                         , oracle_args['sevicename']))
-
             dsn = cx_Oracle.makedsn(oracle_args['host'], oracle_args['port'], sid = oracle_args['sid']) # , service_name=oracle_args['sevicename']
-
             con0 = cx_Oracle.connect(user = oracle_args['user'], password = oracle_args['password'], dsn=dsn)
 
             with closing(con0) as con:
@@ -104,9 +96,9 @@ class oracle_connecter(object):
         os.environ['NLS_LANG'] = 'SIMPLIFIED CHINESE_CHINA.%s' %oracle_args['charset']
 
         dsn = cx_Oracle.makedsn(oracle_args['host'], oracle_args['port'], sid = oracle_args['sid']) # , service_name=oracle_args['sevicename']
-        con0 = cx_Oracle.connect(user = oracle_args['user'], password = oracle_args['password'], dsn=dsn)
+        conn0 = cx_Oracle.connect(user = oracle_args['user'], password = oracle_args['password'], dsn=dsn)
 
-        with closing(con0) as conn:
+        with closing(conn0) as conn:
             cur = conn.cursor()
             cur.execute("ALTER SESSION SET CURRENT_SCHEMA = \"%s\"" % oracle_args['dbname'])
 

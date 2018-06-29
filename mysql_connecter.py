@@ -78,7 +78,6 @@ class mysql_connecter(object):
                                      mysql_args['dbname'],
                                      charset=mysql_args['charset'])) as conn:
             df = pd.read_sql(sql, conn)
-
         return df
 
     def insert_df_data(self, df, table_name, mysql_args, method="INSERT", fill_na=None):

@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="cb149dc6-353b-4ec5-996d-92e02f2442f2" name="Default" comment="">
+    <list default="true" id="cb149dc6-353b-4ec5-996d-92e02f2442f2" name="Default" comment="s">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mysql_connecter.py" beforeDir="false" afterPath="$PROJECT_DIR$/mysql_connecter.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/oracle_connecter.py" beforeDir="false" afterPath="$PROJECT_DIR$/oracle_connecter.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -17,20 +18,20 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="mysql_connecter.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="mysql_connecter.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/mysql_connecter.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="288">
-              <caret line="165" selection-start-line="165" selection-end-line="165" />
+            <state relative-caret-position="236">
+              <caret line="76" column="58" lean-forward="true" selection-start-line="76" selection-start-column="58" selection-end-line="76" selection-end-column="58" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="oracle_connecter.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="oracle_connecter.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/oracle_connecter.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="272">
-              <caret line="79" column="30" lean-forward="true" selection-start-line="79" selection-start-column="30" selection-end-line="79" selection-end-column="30" />
+            <state relative-caret-position="209">
+              <caret line="93" lean-forward="true" selection-start-line="93" selection-end-line="93" />
             </state>
           </provider>
         </entry>
@@ -58,6 +59,7 @@
       <find>ori_data[1]</find>
       <find>chain</find>
       <find>std_out_handle</find>
+      <find>mysql</find>
     </findStrings>
     <replaceStrings>
       <replace>target_type</replace>
@@ -70,6 +72,7 @@
       <replace>ori_data['infoCode']</replace>
       <replace>ori_data['insName']</replace>
       <replace>ori_data['datetime']</replace>
+      <replace>pymysql</replace>
     </replaceStrings>
   </component>
   <component name="Git.Settings">
@@ -100,8 +103,8 @@
         <option value="$PROJECT_DIR$/func_manager.py" />
         <option value="$PROJECT_DIR$/html_table_reader.py" />
         <option value="$PROJECT_DIR$/driver_manager.py" />
-        <option value="$PROJECT_DIR$/mysql_connecter.py" />
         <option value="$PROJECT_DIR$/oracle_connecter.py" />
+        <option value="$PROJECT_DIR$/mysql_connecter.py" />
       </list>
     </option>
   </component>
@@ -427,7 +430,21 @@
       <option name="project" value="LOCAL" />
       <updated>1530079483451</updated>
     </task>
-    <option name="localTasksCounter" value="23" />
+    <task id="LOCAL-00023" summary="解决cx_Oracle 5 及以下版本数据量大时报错的问题">
+      <created>1530082044966</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1530082044966</updated>
+    </task>
+    <task id="LOCAL-00024" summary="增加df的输出方式">
+      <created>1530085481004</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1530085481004</updated>
+    </task>
+    <option name="localTasksCounter" value="25" />
     <servers />
   </component>
   <component name="TodoView">
@@ -443,14 +460,14 @@
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.4942717" visible="true" weight="0.23761855" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.4942717" visible="true" weight="0.23761855" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32936078" />
       <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.50105375" side_tool="true" weight="0.36944744" />
       <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49894625" weight="0.36944744" />
       <window_info anchor="bottom" id="Version Control" order="7" weight="0.32900432" />
-      <window_info active="true" anchor="bottom" id="Python Console" order="7" visible="true" weight="0.46695557" />
+      <window_info anchor="bottom" id="Python Console" order="7" weight="0.46695557" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
-      <window_info anchor="bottom" id="Terminal" order="7" sideWeight="0.49603173" weight="0.32258064" />
+      <window_info anchor="bottom" id="Terminal" order="7" sideWeight="0.49603173" weight="0.3217768" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39935064" />
       <window_info id="Favorites" order="2" sideWeight="0.5057283" side_tool="true" weight="0.24962178" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -474,7 +491,9 @@
     <MESSAGE value="微调" />
     <MESSAGE value="save" />
     <MESSAGE value="python3 update" />
-    <option name="LAST_COMMIT_MESSAGE" value="python3 update" />
+    <MESSAGE value="解决cx_Oracle 5 及以下版本数据量大时报错的问题" />
+    <MESSAGE value="增加df的输出方式" />
+    <option name="LAST_COMMIT_MESSAGE" value="增加df的输出方式" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/requests_manager.py">
@@ -660,17 +679,17 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/mysql_connecter.py">
+    <entry file="file://$PROJECT_DIR$/oracle_connecter.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="288">
-          <caret line="165" selection-start-line="165" selection-end-line="165" />
+        <state relative-caret-position="209">
+          <caret line="93" lean-forward="true" selection-start-line="93" selection-end-line="93" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/oracle_connecter.py">
+    <entry file="file://$PROJECT_DIR$/mysql_connecter.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="272">
-          <caret line="79" column="30" lean-forward="true" selection-start-line="79" selection-start-column="30" selection-end-line="79" selection-end-column="30" />
+        <state relative-caret-position="236">
+          <caret line="76" column="58" lean-forward="true" selection-start-line="76" selection-start-column="58" selection-end-line="76" selection-end-column="58" />
         </state>
       </provider>
     </entry>
