@@ -80,6 +80,20 @@ class mysql_connecter(object):
             df = pd.read_sql(sql, conn)
         return df
 
+    def create_table(self, col_names, table_name, mysql_args):
+        # 暂定所有字段都是字符串，默认为空白字符
+
+        col_str = ',\n'.join(["`%s` VARCHAR(255) default ''" %s for s in col_names])
+
+        sql = """
+        CREATE TABLE IF NOT EXISTS `%s`(
+           %s
+        )ENGINE=InnoDB DEFAULT CHARSET=utf8;
+        """ %(table_name, col_str)
+
+        self.connect(sql, mysql_args)
+        print("create successfully !")
+
     def insert_df_data(self, df, table_name, mysql_args, method="INSERT", fill_na=None):
         """
         如果在INSERT语句末尾指定了ON DUPLICATE KEY UPDATE，并且插入行后会导致在一个UNIQUE索引或PRIMARY KEY中出现重复值，
@@ -197,10 +211,10 @@ class mysql_connecter(object):
 if __name__ == '__main__':
     mysql_connecter = mysql_connecter()
     mysql_args = {
-        "host": "116.62.230.38",
-        "user": "spider444",
-        "password": "startspider",
-        "dbname": "spider",
+        "host": "localhost",
+        "user": "Dyson",
+        "password": "122321",
+        "dbname": "y2000",
         "charset": "utf8"
     }
     # sql = "SELECT * FROM monitor limit 10"
@@ -214,4 +228,5 @@ if __name__ == '__main__':
 
     df = pd.DataFrame({1:{"A":23,"B":213}, 2:{"A":434,"C":213}}).T
     print(df)
-    mysql_connecter.update_df_data(df,'', 'A',mysql_args , fill_na=0)
+    # mysql_connecter.update_df_data(df,'', 'A',mysql_args , fill_na=0)
+    mysql_connecter.create_table(list(df.columns), 'test', mysql_args)
