@@ -71,16 +71,17 @@ class requests_manager(object):
         headers = kwargs['headers'] if 'headers' in kwargs else self.headers
 
         cookies = kwargs['cookies'] if 'cookies' in kwargs else None
-
+		
         self.headers['User-Agent'] = random.choice(user_agent_list)
-        print("user_agent:", self.headers['User-Agent'])
 
         resp = requests.get(url, headers=headers, cookies=cookies)
-        resp.encoding = resp.apparent_encoding
+        resp.encoding = kwargs['charset'] if 'charset' in kwargs else resp.apparent_encoding
         resp.raise_for_status()
 
         html = resp.text
         resp.close()
+		
+		print("web_code:%s\nuser_agent:%s"%(resp.encoding, self.headers['User-Agent']))
         return html
 
     def get_file(self, url, targetfile):

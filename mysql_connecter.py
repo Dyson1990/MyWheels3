@@ -133,7 +133,7 @@ class mysql_connecter(object):
 
         #print df
         data_l = list(chain(*np.array(df).tolist()))
-        print(data_l)
+        # print(data_l)
 
         if method == 'UPDATE':
             sql = sql + 'ON DUPLICATE KEY UPDATE ' + ','.join(['`%s`=VALUES(`%s`)' %((s,) * 2) for s in df.columns])
@@ -184,7 +184,7 @@ class mysql_connecter(object):
             sql_list.append(sql1 + '\nEND')
         sql = sql + ',\n'.join(sql_list) + "\nWHERE `%s` IN (%s)" %(index_name, ','.join(["'%s'" %s for s in df.index.tolist()]))
         
-        print(sql)
+        # print(sql)
 
         self.connect(sql, mysql_args)
         print("UPDATE successfully !")
