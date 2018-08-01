@@ -10,8 +10,7 @@
 """
 import traceback
 
-import pymysql
-import sys
+import sqlalchemy
 
 import pandas as pd
 import numpy as np
@@ -23,15 +22,19 @@ from contextlib import closing
 #                          set_log.logging.DEBUG)
 # log_obj.cleanup('mysql_connecter.log', if_cleanup=True)  # 是否需要在每次运行程序前清空Log文件
 
+eng_str = {
+        'oracle':"{db_dialect}+{db_driver}://{user}:{password}@{host}:{port}/{sid}?charset={charset}"
+        , 'mysql': ""
+        }
 sql_func = {
         }
 
-class mysql_connecter(object):
+class sql_connecter(object):
 
     def __init__(self):
         pass
     
-    def connect(self,sql, mysql_args, args=None):
+    def connect(self,sql, sql_args, args=None):
         """
         最常用的连接MySQL的方式
         sql 可以是一条sql语句， 也可以是sql语句组成的列表
@@ -39,65 +42,59 @@ class mysql_connecter(object):
         """
         data = []
 
-        mysql_args = self.standardize_args(mysql_args)
+        sql_args = self.standardize_args(sql_args)
 
         try:
-            with closing(pymysql.connect(mysql_args['host'],
-                                       mysql_args['user'],
-                                       mysql_args['password'],
-                                       mysql_args['dbname'],
-                                       charset = mysql_args['charset'])) as conn:
-                cur = conn.cursor()
+            # 使用哪种数据库，填入Oralce，MySQL等等
+            db_dialect = sql_args['db_dialect'] 
+            engine = sqlalchemy.create_engine(eng_str[db_dialect].format(**sql_args))
             
+            with closing(engine.connect()) as conn:
                 # 多条SQL语句的话，循环执行
+                # rp short for ResultProxy
                 if isinstance(sql,list):
                     for sql0 in sql:
-                        cur.execute(sql0)
+                        rp = conn.execute(sql0)
+                elif args:
+                    rp = conn.execute(sql,args)
                 else:
-                    cur.execute(sql,args)
-
-                data_info = cur.description # 获取到的数据的表结构
+                    rp = conn.execute(sql)
+                
+                print(rp)
+                print(dir(rp))
+                print(rp.keys())
                 
                 # 实现对结果每个数据的处理方法
-                if isinstance(mysql_args['method'], type(None)):
-                    data = cur.fetchall()
+                if isinstance(sql_args['method'], type(None)):
+                    data = rp.fetchall()
                     
-                elif isinstance(mysql_args['method'], str):
-                    # 传入的参数是字符，则在sql_func中查询函数
-                    method0 = mysql_args['method']
-                    data = [[sql_func[method0](cell) for cell in row] for row in cur]
-                    
-                elif isinstance(mysql_args['method'], type(lambda :0)):
-                    # 传入的参数是公式，则直接使用
-                    method0 = mysql_args['method']
-                    data = [[method0(cell) for cell in row] for row in cur]
-                    
-                elif isinstance(mysql_args['method'], list):
-                    # 传入列表， 就一个个重复上面的两个判断
-                    for method0 in mysql_args['method']:
-                        if isinstance(mysql_args['method'], str):
-                            method0 = mysql_args['method']
-                            data = [[sql_func[method0](cell) for cell in row] for row in cur]
-                        elif isinstance(mysql_args['method'], type(lambda :0)):
-                            method0 = mysql_args['method']
-                            data = [[method0(cell) for cell in row] for row in cur]
-                        else:
-                            raise(Exception('输入的参数method有误！！！'))
-                else:
-                    raise(Exception('输入的参数method有误！！！'))
+# =============================================================================
+#                 elif isinstance(sql_args['method'], list):
+#                     # 传入列表， 就一个个重复上面的两个判断
+#                     for method0 in sql_args['method']:
+#                         if isinstance(sql_args['method'], str):
+#                             # 传入的参数是字符，则在sql_func中查询函数
+#                             method0 = sql_args['method']
+#                             data = [[sql_func[method0](cell) for cell in row] for row in conn]
+#                         elif isinstance(sql_args['method'], type(lambda :0)):
+#                             # 传入的参数是公式，则直接使用
+#                             method0 = sql_args['method']
+#                             data = [[method0(cell) for cell in row] for row in conn]
+#                         else:
+#                             raise(Exception('输入的参数method有误！！！'))
+#                 else:
+#                     raise(Exception('输入的参数method有误！！！'))
+# =============================================================================
 
                 # 修改返回数据的类型
-                if mysql_args['data_type'] == 'list':
+                if sql_args['data_type'] == 'list':
                     data = [list(t) for t in data]
-                elif mysql_args['data_type'] in ('DataFrame', 'dataframe'):
+                elif sql_args['data_type'] in ('DataFrame', 'dataframe'):
                     data = [list(t) for t in data] # 要求传入列表，不能是
-                    data = pd.DataFrame(data, columns=[r[0] for r in data_info])
+                    data = pd.DataFrame(data, columns=rp.keys())
                 else:
                     raise(Exception('输入的参数data_type有误！！！'))
-                
-                conn.commit() #插入数据的时候用到
-                cur.close()
-                
+                    
                 return data
         except:
             print("数据库交互出错：%s" % traceback.format_exc())
@@ -109,23 +106,22 @@ class mysql_connecter(object):
 #                con.close()
 
 
-
 # =============================================================================
-#     def df_output(self, sql, mysql_args):
+#     def df_output(self, sql, sql_args):
 #         # 用pandas来从MySQL读取数据
 # 
-#         mysql_args = self.standardize_args(mysql_args)
+#         sql_args = self.standardize_args(sql_args)
 # 
-#         with closing(pymysql.connect(mysql_args['host'],
-#                                      mysql_args['user'],
-#                                      mysql_args['password'],
-#                                      mysql_args['dbname'],
-#                                      charset=mysql_args['charset'])) as conn:
+#         with closing(pymysql.connect(sql_args['host'],
+#                                      sql_args['user'],
+#                                      sql_args['password'],
+#                                      sql_args['dbname'],
+#                                      charset=sql_args['charset'])) as conn:
 #             df = pd.read_sql(sql, conn)
 #         return df
 # =============================================================================
 
-    def create_table(self, col_names, table_name, mysql_args):
+    def create_table(self, col_names, table_name, sql_args):
         # 暂定所有字段都是字符串，默认为空白字符
 
         col_str = ',\n'.join(["`%s` VARCHAR(255) default ''" %s for s in col_names])
@@ -136,10 +132,10 @@ class mysql_connecter(object):
         )ENGINE=InnoDB DEFAULT CHARSET=utf8;
         """ %(table_name, col_str)
 
-        self.connect(sql, mysql_args)
+        self.connect(sql, sql_args)
         print("create successfully !")
 
-    def insert_df_data(self, df, table_name, mysql_args, method="INSERT", fill_na=None):
+    def insert_df_data(self, df, table_name, sql_args, method="INSERT", fill_na=None):
         """
         如果在INSERT语句末尾指定了ON DUPLICATE KEY UPDATE，并且插入行后会导致在一个UNIQUE索引或PRIMARY KEY中出现重复值，
         则在出现重复值的行执行UPDATE；如果不会导致唯一值列重复的问题，则插入新行。
@@ -185,10 +181,10 @@ class mysql_connecter(object):
             method = 'INSERT.... ON DUPLICATE KEY UPDATE'
 
         # print(sql)
-        self.connect(sql, mysql_args, args=data_l)
+        self.connect(sql, sql_args, args=data_l)
         print("%s successfully !" %method)
 
-    def update_df_data(self, df, table_name, index_name, mysql_args, fill_na=None):
+    def update_df_data(self, df, table_name, index_name, sql_args, fill_na=None):
         """
         举例说明
         df:
@@ -231,42 +227,58 @@ class mysql_connecter(object):
         
         print(sql)
 
-        self.connect(sql, mysql_args)
+        self.connect(sql, sql_args)
         print("UPDATE successfully !")
 
-    def standardize_args(self, mysql_args):
+    def standardize_args(self, sql_args):
         # 检查所需参数是否都存在
 
-        if not isinstance(mysql_args, dict):
-            raise Exception("mysql_args格式错误！！！")
-
-        needed_args = ['host', 'user', 'password', 'dbname']
-        check_args = [s for s in needed_args if s not in mysql_args]
+        if not isinstance(sql_args, dict):
+            raise Exception("sql_args格式错误！！！")
+        
+        if sql_args['db_dialect'].lower() == 'oracle':
+            needed_args = ['db_dialect', 'db_driver', 'host', 'user', 'password', 'sid', 'dbname']
+        elif sql_args['db_dialect'].lower() == 'mysql':
+            needed_args = ['db_dialect', 'db_driver', 'host', 'user', 'password', 'dbname']
+        
+        check_args = [s for s in needed_args if s not in sql_args]
         if check_args:
             raise Exception("缺少数据库参数：%s" % '，'.join(check_args))
 
-        if 'charset' not in mysql_args:
-            mysql_args['charset'] = 'utf8'
-        if 'method' not in mysql_args:
+        if 'port' not in sql_args and sql_args['db_dialect'].lower() == 'oracle':
+            sql_args['port'] = '1521'
+        if 'port' not in sql_args and sql_args['db_dialect'].lower() == 'mysql':
+            sql_args['port'] = '3306'
+        
+        if 'charset' not in sql_args:
+            sql_args['charset'] = 'utf8'
+        if 'method' not in sql_args:
             # 没有参数传入，则使用fetchall
-            mysql_args['method'] = None
-        if 'data_type' not in mysql_args:
-            mysql_args['data_type'] = 'list'
+            sql_args['method'] = None
+        if 'data_type' not in sql_args:
+            sql_args['data_type'] = 'list'
             
-        return mysql_args
+        sql_args['db_dialect'] = sql_args['db_dialect'].lower()
+        sql_args['db_driver'] = sql_args['db_driver'].lower()
+            
+        return sql_args
+    
+    
 
 
 
 
 if __name__ == '__main__':
-    mysql_connecter = mysql_connecter()
-    mysql_args = {
-        "host": "localhost",
-        "user": "Dyson",
-        "password": "122321",
-        "dbname": "world",
-        "charset": "utf8",
-        "data_type":"DataFrame"
+    sql_connecter = sql_connecter()
+    sql_args = {
+        'db_dialect': 'oracle'
+        , 'db_driver': 'cx_Oracle'
+        , "host": "localhost"
+        , "user": "Dyson"
+        , "password": "122321"
+        , 'sid': 'XE'
+        , 'dbname': 'HR'
+        , 'data_type': 'DataFrame'
     }
-    print(mysql_connecter.connect('SELECT * FROM city', mysql_args))
+    print(sql_connecter.connect('SELECT JOB_ID, MIN_SALARY, COMMIT FROM HR.JOBS', sql_args))
 

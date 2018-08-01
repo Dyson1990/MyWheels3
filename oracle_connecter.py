@@ -179,7 +179,7 @@ if __name__ == '__main__':
         , 'dbname': 'HR'
         , 'method': 'LOB'
         , 'data_type': 'DataFrame'}
-    print(oracle_connecter.connect('SELECT JOB_ID, MIN_SALARY, COMMIT FROM JOBS', oracle_args))
+    print(oracle_connecter.connect('SELECT JOB_ID, MIN_SALARY, COMMIT FROM HR.JOBS', oracle_args))
 
 
 
