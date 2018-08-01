@@ -22,7 +22,11 @@ import traceback
 #                         set_log.logging.DEBUG)
 #log_obj.cleanup('oracle_connecter.log', if_cleanup = True)  # 是否需要在每次运行程序前清空Log文件
 
-print('cx_Oracle.version: ' + cx_Oracle.version)
+# print('cx_Oracle.version: ' + cx_Oracle.version)
+
+sql_func = {
+        'LOB':(lambda s: s.read() if isinstance(s, cx_Oracle.LOB) else s),
+        }
 
 class oracle_connecter(object):
 
@@ -50,8 +54,8 @@ class oracle_connecter(object):
             dsn = cx_Oracle.makedsn(oracle_args['host'], oracle_args['port'], sid = oracle_args['sid']) # , service_name=oracle_args['sevicename']
             con0 = cx_Oracle.connect(user = oracle_args['user'], password = oracle_args['password'], dsn=dsn)
 
-            with closing(con0) as con:
-                cur = con.cursor()
+            with closing(con0) as conn:
+                cur = conn.cursor()
 
                 # 选择需要操作的数据库
                 cur.execute("ALTER SESSION SET CURRENT_SCHEMA = \"%s\"" %oracle_args['dbname'])
@@ -66,45 +70,77 @@ class oracle_connecter(object):
                         cur.execute(sql, args)
                     else:
                         cur.execute(sql)
+                        
+                data_info = cur.description # 获取到的数据的表结构
+                
+                # 实现对结果每个数据的处理方法
+                if isinstance(oracle_args['method'], type(None)):
+                    data = cur.fetchall()
+                    
+                elif isinstance(oracle_args['method'], str):
+                    # 传入的参数是字符，则在sql_func中查询函数
+                    method0 = oracle_args['method']
+                    data = [[sql_func[method0](cell) for cell in row] for row in cur]
+                    
+                elif isinstance(oracle_args['method'], type(lambda :0)):
+                    # 传入的参数是公式，则直接使用
+                    method0 = oracle_args['method']
+                    data = [[method0(cell) for cell in row] for row in cur]
+                    
+                elif isinstance(oracle_args['method'], list):
+                    # 传入列表， 就一个个重复上面的两个判断
+                    for method0 in oracle_args['method']:
+                        if isinstance(oracle_args['method'], str):
+                            method0 = oracle_args['method']
+                            data = [[sql_func[method0](cell) for cell in row] for row in cur]
+                        elif isinstance(oracle_args['method'], type(lambda :0)):
+                            method0 = oracle_args['method']
+                            data = [[method0(cell) for cell in row] for row in cur]
+                        else:
+                            raise(Exception('输入的参数method有误！！！'))
+                else:
+                    raise(Exception('输入的参数method有误！！！'))
 
-                # 若cx_Oracle版本比较低，一次能获取的数据有限制，保险起见每次只取一条
-                # if float(cx_Oracle.version) < 6.0:
-                #     data = []
-                #     res = True
-                #     while res:
-                #         res = cur.fetchone()
-                #         data.append(res)
-                #     data = data[:-1] # 剔除最后一个None，以免报错
-                # else:
-
-                data = cur.fetchall()
-                con.commit()
-
+                # 修改返回数据的类型
+                if oracle_args['data_type'] == 'list':
+                    data = [list(t) for t in data]
+                elif oracle_args['data_type'] in ('DataFrame', 'dataframe'):
+                    data = [list(t) for t in data] # 要求传入列表，不能是
+                    data = pd.DataFrame(data, columns=[r[0] for r in data_info])
+                else:
+                    raise(Exception('输入的参数data_type有误！！！'))
+                
+                conn.commit() #插入数据的时候用到
+                cur.close()
+                
+                return data
         except:
             print("数据库交互出错：%s" % traceback.format_exc())
+            return None
 
     #        finally:
     #            if con:
     #                #无论如何，连接记得关闭
     #                con.close()
-        return [list(t) for t in data]
 
-    def df_output(self, sql, oracle_args):
-        # 用pandas来从MySQL读取数据
-
-        oracle_args = self.standardize_args(oracle_args)
-        os.environ['NLS_LANG'] = 'SIMPLIFIED CHINESE_CHINA.%s' %oracle_args['charset']
-
-        dsn = cx_Oracle.makedsn(oracle_args['host'], oracle_args['port'], sid = oracle_args['sid']) # , service_name=oracle_args['sevicename']
-        conn0 = cx_Oracle.connect(user = oracle_args['user'], password = oracle_args['password'], dsn=dsn)
-
-        with closing(conn0) as conn:
-            cur = conn.cursor()
-            cur.execute("ALTER SESSION SET CURRENT_SCHEMA = \"%s\"" % oracle_args['dbname'])
-
-            df = pd.read_sql(sql, conn)
-
-        return df
+# =============================================================================
+#     def df_output(self, sql, oracle_args):
+#         # 用pandas来从MySQL读取数据
+# 
+#         oracle_args = self.standardize_args(oracle_args)
+#         os.environ['NLS_LANG'] = 'SIMPLIFIED CHINESE_CHINA.%s' %oracle_args['charset']
+# 
+#         dsn = cx_Oracle.makedsn(oracle_args['host'], oracle_args['port'], sid = oracle_args['sid']) # , service_name=oracle_args['sevicename']
+#         conn0 = cx_Oracle.connect(user = oracle_args['user'], password = oracle_args['password'], dsn=dsn)
+# 
+#         with closing(conn0) as conn:
+#             cur = conn.cursor()
+#             cur.execute("ALTER SESSION SET CURRENT_SCHEMA = \"%s\"" % oracle_args['dbname'])
+# 
+#             df = pd.read_sql(sql, conn)
+# 
+#         return df
+# =============================================================================
 
     def standardize_args(self, oracle_args):
         # 检查所需参数是否都存在
@@ -123,6 +159,11 @@ class oracle_connecter(object):
             oracle_args['port'] = '1521'
         if 'charset' not in oracle_args:
             oracle_args['charset'] = 'UTF8'
+        if 'method' not in oracle_args:
+            # 没有参数传入，则使用fetchall
+            oracle_args['method'] = None
+        if 'data_type' not in oracle_args:
+            oracle_args['data_type'] = 'list'
 
         return oracle_args
 
@@ -130,20 +171,25 @@ class oracle_connecter(object):
 if __name__ == '__main__':
     oracle_connecter = oracle_connecter()
 
-    # 本地测试案例
+    # 本地测试案例cx_Oracle-6.4.1-cp36-cp36m-win_amd64.whl
     oracle_args = {'user': 'system'
         , 'password': '122321'
         , 'host': 'localhost'
         , 'sid': 'XE'
-        , 'dbname': 'HR'}
-    print(oracle_connecter.connect('SELECT * FROM JOBS', oracle_args))
-    print(oracle_connecter.df_output('SELECT * FROM JOBS', oracle_args))
+        , 'dbname': 'HR'
+        , 'method': 'LOB'
+        , 'data_type': 'DataFrame'}
+    print(oracle_connecter.connect('SELECT JOB_ID, MIN_SALARY, COMMIT FROM JOBS', oracle_args))
 
 
-    # 服务器测试
-    # oracle_args = {'user': 'VW_NOV06'
-    #     , 'password': 'C372M5c590'
-    #     , 'host': '172.17.32.2'
-    #     , 'sid': 'orcl'
-    #     , 'dbname': 'CDB_NOV'}
-    # print(oracle_connecter.connect('SELECT * FROM F_QY_JBXX WHERE ROWNUM <= 10', oracle_args))
+
+
+# =============================================================================
+#     # 服务器测试
+#     oracle_args = {'user': 'VW_NOV06'
+#         , 'password': 'C372M5c590'
+#         , 'host': '172.17.32.2'
+#         , 'sid': 'orcl'
+#         , 'dbname': 'CDB_NOV'}
+#     print(oracle_connecter.connect('SELECT * FROM F_QY_JBXX WHERE ROWNUM <= 10', oracle_args))
+# =============================================================================

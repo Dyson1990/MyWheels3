@@ -23,6 +23,8 @@ from contextlib import closing
 #                          set_log.logging.DEBUG)
 # log_obj.cleanup('mysql_connecter.log', if_cleanup=True)  # 是否需要在每次运行程序前清空Log文件
 
+sql_func = {
+        }
 
 class mysql_connecter(object):
 
@@ -54,11 +56,52 @@ class mysql_connecter(object):
                 else:
                     cur.execute(sql,args)
 
-                data = cur.fetchall()
-                conn.commit()
+                data_info = cur.description # 获取到的数据的表结构
+                
+                # 实现对结果每个数据的处理方法
+                if isinstance(mysql_args['method'], type(None)):
+                    data = cur.fetchall()
+                    
+                elif isinstance(mysql_args['method'], str):
+                    # 传入的参数是字符，则在sql_func中查询函数
+                    method0 = mysql_args['method']
+                    data = [[sql_func[method0](cell) for cell in row] for row in cur]
+                    
+                elif isinstance(mysql_args['method'], type(lambda :0)):
+                    # 传入的参数是公式，则直接使用
+                    method0 = mysql_args['method']
+                    data = [[method0(cell) for cell in row] for row in cur]
+                    
+                elif isinstance(mysql_args['method'], list):
+                    # 传入列表， 就一个个重复上面的两个判断
+                    for method0 in mysql_args['method']:
+                        if isinstance(mysql_args['method'], str):
+                            method0 = mysql_args['method']
+                            data = [[sql_func[method0](cell) for cell in row] for row in cur]
+                        elif isinstance(mysql_args['method'], type(lambda :0)):
+                            method0 = mysql_args['method']
+                            data = [[method0(cell) for cell in row] for row in cur]
+                        else:
+                            raise(Exception('输入的参数method有误！！！'))
+                else:
+                    raise(Exception('输入的参数method有误！！！'))
 
+                # 修改返回数据的类型
+                if mysql_args['data_type'] == 'list':
+                    data = [list(t) for t in data]
+                elif mysql_args['data_type'] in ('DataFrame', 'dataframe'):
+                    data = [list(t) for t in data] # 要求传入列表，不能是
+                    data = pd.DataFrame(data, columns=[r[0] for r in data_info])
+                else:
+                    raise(Exception('输入的参数data_type有误！！！'))
+                
+                conn.commit() #插入数据的时候用到
+                cur.close()
+                
+                return data
         except:
-            print("数据库交互出错：%s" %traceback.format_exc())
+            print("数据库交互出错：%s" % traceback.format_exc())
+            return None
 
 #        finally:
 #            if con:
@@ -67,18 +110,20 @@ class mysql_connecter(object):
 
         return [list(t) for t in data]
 
-    def df_output(self, sql, mysql_args):
-        # 用pandas来从MySQL读取数据
-
-        mysql_args = self.standardize_args(mysql_args)
-
-        with closing(pymysql.connect(mysql_args['host'],
-                                     mysql_args['user'],
-                                     mysql_args['password'],
-                                     mysql_args['dbname'],
-                                     charset=mysql_args['charset'])) as conn:
-            df = pd.read_sql(sql, conn)
-        return df
+# =============================================================================
+#     def df_output(self, sql, mysql_args):
+#         # 用pandas来从MySQL读取数据
+# 
+#         mysql_args = self.standardize_args(mysql_args)
+# 
+#         with closing(pymysql.connect(mysql_args['host'],
+#                                      mysql_args['user'],
+#                                      mysql_args['password'],
+#                                      mysql_args['dbname'],
+#                                      charset=mysql_args['charset'])) as conn:
+#             df = pd.read_sql(sql, conn)
+#         return df
+# =============================================================================
 
     def create_table(self, col_names, table_name, mysql_args):
         # 暂定所有字段都是字符串，默认为空白字符
@@ -184,7 +229,7 @@ class mysql_connecter(object):
             sql_list.append(sql1 + '\nEND')
         sql = sql + ',\n'.join(sql_list) + "\nWHERE `%s` IN (%s)" %(index_name, ','.join(["'%s'" %s for s in df.index.tolist()]))
         
-        # print(sql)
+        print(sql)
 
         self.connect(sql, mysql_args)
         print("UPDATE successfully !")
@@ -202,7 +247,12 @@ class mysql_connecter(object):
 
         if 'charset' not in mysql_args:
             mysql_args['charset'] = 'utf8'
-
+        if 'method' not in mysql_args:
+            # 没有参数传入，则使用fetchall
+            mysql_args['method'] = None
+        if 'data_type' not in mysql_args:
+            mysql_args['data_type'] = 'list'
+            
         return mysql_args
 
 
@@ -214,19 +264,9 @@ if __name__ == '__main__':
         "host": "localhost",
         "user": "Dyson",
         "password": "122321",
-        "dbname": "y2000",
-        "charset": "utf8"
+        "dbname": "world",
+        "charset": "utf8",
+        "data_type":"DataFrame"
     }
-    # sql = "SELECT * FROM monitor limit 10"
-    # print(mysql_connecter.connect(sql,
-    #                               host = mysql_args["host"],
-    #                               user = mysql_args["user"],
-    #                               password = mysql_args["password"],
-    #                               dbname = mysql_args["dbname"],
-    #                               charset=mysql_args["charset"]
-    #                               ))
+    print(mysql_connecter.connect('SELECT * FROM city', mysql_args))
 
-    df = pd.DataFrame({1:{"A":23,"B":213}, 2:{"A":434,"C":213}}).T
-    print(df)
-    # mysql_connecter.update_df_data(df,'', 'A',mysql_args , fill_na=0)
-    mysql_connecter.create_table(list(df.columns), 'test', mysql_args)
