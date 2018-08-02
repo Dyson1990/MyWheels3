@@ -24,9 +24,11 @@ from contextlib import closing
 
 eng_str = {
         'oracle':"{db_dialect}+{db_driver}://{user}:{password}@{host}:{port}/{sid}?charset={charset}"
-        , 'mysql': ""
+        , 'mysql': "{db_dialect}+{db_driver}://{user}:{password}@{host}:{port}/?charset={charset}"
         }
-sql_func = {
+dbname_str = {
+        'oracle':"ALTER SESSION SET CURRENT_SCHEMA = \"{}\""
+        , 'mysql':"USE `{}`"
         }
 
 class sql_connecter(object):
@@ -41,7 +43,8 @@ class sql_connecter(object):
         :return: list
         """
         data = []
-
+        
+        global eng_str
         sql_args = self.standardize_args(sql_args)
 
         try:
@@ -50,6 +53,10 @@ class sql_connecter(object):
             engine = sqlalchemy.create_engine(eng_str[db_dialect].format(**sql_args))
             
             with closing(engine.connect()) as conn:
+                # 选择数据库
+                global dbname_str
+                conn.execute(dbname_str[db_dialect].format(sql_args['dbname']))
+                
                 # 多条SQL语句的话，循环执行
                 # rp short for ResultProxy
                 if isinstance(sql,list):
@@ -60,31 +67,7 @@ class sql_connecter(object):
                 else:
                     rp = conn.execute(sql)
                 
-                print(rp)
-                print(dir(rp))
-                print(rp.keys())
-                
-                # 实现对结果每个数据的处理方法
-                if isinstance(sql_args['method'], type(None)):
-                    data = rp.fetchall()
-                    
-# =============================================================================
-#                 elif isinstance(sql_args['method'], list):
-#                     # 传入列表， 就一个个重复上面的两个判断
-#                     for method0 in sql_args['method']:
-#                         if isinstance(sql_args['method'], str):
-#                             # 传入的参数是字符，则在sql_func中查询函数
-#                             method0 = sql_args['method']
-#                             data = [[sql_func[method0](cell) for cell in row] for row in conn]
-#                         elif isinstance(sql_args['method'], type(lambda :0)):
-#                             # 传入的参数是公式，则直接使用
-#                             method0 = sql_args['method']
-#                             data = [[method0(cell) for cell in row] for row in conn]
-#                         else:
-#                             raise(Exception('输入的参数method有误！！！'))
-#                 else:
-#                     raise(Exception('输入的参数method有误！！！'))
-# =============================================================================
+                data = rp.fetchall()
 
                 # 修改返回数据的类型
                 if sql_args['data_type'] == 'list':
@@ -100,26 +83,6 @@ class sql_connecter(object):
             print("数据库交互出错：%s" % traceback.format_exc())
             return None
 
-#        finally:
-#            if con:
-#                #无论如何，连接记得关闭
-#                con.close()
-
-
-# =============================================================================
-#     def df_output(self, sql, sql_args):
-#         # 用pandas来从MySQL读取数据
-# 
-#         sql_args = self.standardize_args(sql_args)
-# 
-#         with closing(pymysql.connect(sql_args['host'],
-#                                      sql_args['user'],
-#                                      sql_args['password'],
-#                                      sql_args['dbname'],
-#                                      charset=sql_args['charset'])) as conn:
-#             df = pd.read_sql(sql, conn)
-#         return df
-# =============================================================================
 
     def create_table(self, col_names, table_name, sql_args):
         # 暂定所有字段都是字符串，默认为空白字符
@@ -270,15 +233,29 @@ class sql_connecter(object):
 
 if __name__ == '__main__':
     sql_connecter = sql_connecter()
+    
+# =============================================================================
+#     # 本地测试Oracle参数
+#     sql_args = {
+#         'db_dialect': 'oracle'
+#         , 'db_driver': 'cx_Oracle'
+#         , "host": "localhost"
+#         , "user": "Dyson"
+#         , "password": "122321"
+#         , 'sid': 'XE'
+#         , 'dbname': 'HR'
+#         , 'data_type': 'DataFrame'
+#     }
+#    print(sql_connecter.connect('SELECT JOB_ID, MIN_SALARY, COMMIT FROM JOBS', sql_args))
+# =============================================================================
     sql_args = {
-        'db_dialect': 'oracle'
-        , 'db_driver': 'cx_Oracle'
+        'db_dialect': 'MySQL'
+        , 'db_driver': 'pymysql'
         , "host": "localhost"
         , "user": "Dyson"
         , "password": "122321"
-        , 'sid': 'XE'
-        , 'dbname': 'HR'
+        , 'dbname': 'world'
         , 'data_type': 'DataFrame'
     }
-    print(sql_connecter.connect('SELECT JOB_ID, MIN_SALARY, COMMIT FROM HR.JOBS', sql_args))
+    print(sql_connecter.connect('SELECT JOB_ID, MIN_SALARY, COMMIT FROM JOBS', sql_args))
 
