@@ -22,6 +22,7 @@ from contextlib import closing
 #                          set_log.logging.DEBUG)
 # log_obj.cleanup('mysql_connecter.log', if_cleanup=True)  # 是否需要在每次运行程序前清空Log文件
 
+
 eng_str = {
         'oracle':"{db_dialect}+{db_driver}://{user}:{password}@{host}:{port}/{sid}?charset={charset}"
         , 'mysql': "{db_dialect}+{db_driver}://{user}:{password}@{host}:{port}/?charset={charset}"
@@ -29,6 +30,11 @@ eng_str = {
 dbname_str = {
         'oracle':"ALTER SESSION SET CURRENT_SCHEMA = \"{}\""
         , 'mysql':"USE `{}`"
+        }
+np_type2sql_type = {
+        np.str: sqlalchemy.CHAR(),
+        np.int64: sqlalchemy.Integer(),
+        np.float64: sqlalchemy.FLOAT(),
         }
 
 class sql_connecter(object):
@@ -82,7 +88,29 @@ class sql_connecter(object):
         except:
             print("数据库交互出错：%s" % traceback.format_exc())
             return None
-
+    
+    def create_table_like_df(self, df_args, sql_args, args=None):
+        # 暂定所有字段都是字符串，默认为空白字符
+        # Column('id',Integer(),primary_key=True, autoincrement=True),
+        
+        table_name = df_args['table_name']
+        df = df_args['data']
+        primary_key = df_args['primary_key']
+        raise isinstance(df, pd.core.frame.DataFrame)
+        
+        sql_table = sqlalchemy.Table(table_name,sqlalchemy.BaseModel.metadata)
+        
+        for col in df.columns:
+            sql_table.append_column(
+                sqlalchemy.Column(
+                        col,
+                        np_type2sql_type(df[col].dtype),
+                        primary_key=(col == primary_key), 
+                        ),
+                )
+        
+        
+        
 
     def create_table(self, col_names, table_name, sql_args):
         # 暂定所有字段都是字符串，默认为空白字符
@@ -215,6 +243,12 @@ class sql_connecter(object):
         
         if 'charset' not in sql_args:
             sql_args['charset'] = 'utf8'
+            """
+            这种错误很有可能是SQL驱动不完整
+            也可能是数据库的编码与申请的编码不符
+            1366, "Incorrect string value: '\\xD6\\xD0\\xB9\\xFA\\xB1\\xEA...' for column 'VARIABLE_VALUE' at row 484")
+            """
+            
         if 'method' not in sql_args:
             # 没有参数传入，则使用fetchall
             sql_args['method'] = None
@@ -248,14 +282,18 @@ if __name__ == '__main__':
 #     }
 #    print(sql_connecter.connect('SELECT JOB_ID, MIN_SALARY, COMMIT FROM JOBS', sql_args))
 # =============================================================================
-    sql_args = {
-        'db_dialect': 'MySQL'
-        , 'db_driver': 'pymysql'
-        , "host": "localhost"
-        , "user": "Dyson"
-        , "password": "122321"
-        , 'dbname': 'world'
-        , 'data_type': 'DataFrame'
-    }
-    print(sql_connecter.connect('SELECT JOB_ID, MIN_SALARY, COMMIT FROM JOBS', sql_args))
+# =============================================================================
+#     # 测试本地MySQL参数
+#     sql_args = {
+#         'db_dialect': 'MySQL'
+#         , 'db_driver': 'pymysql'
+#         , "host": "localhost"
+#         , "user": "Dyson"
+#         , "password": "122321"
+#         , 'dbname': 'sakila'
+#         , 'data_type': 'DataFrame'
+#     }
+#     print(sql_connecter.connect('SELECT * FROM `actor` LIMIT 20', sql_args))
+# =============================================================================
+    print(dir(sqlalchemy.Table))
 

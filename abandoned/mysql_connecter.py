@@ -264,9 +264,9 @@ if __name__ == '__main__':
         "host": "localhost",
         "user": "Dyson",
         "password": "122321",
-        "dbname": "world",
+        "dbname": "sakila",
         "charset": "utf8",
         "data_type":"DataFrame"
     }
-    print(mysql_connecter.connect('SELECT * FROM city', mysql_args))
+    print(mysql_connecter.connect('SELECT * FROM `actor` LIMIT 20', mysql_args))
 
