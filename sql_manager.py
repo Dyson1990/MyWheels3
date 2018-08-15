@@ -37,7 +37,7 @@ np_type2sql_type = {
         np.float64: sqlalchemy.FLOAT(),
         }
 
-class sql_connecter(object):
+class sql_manager(object):
 
     def __init__(self):
         pass
