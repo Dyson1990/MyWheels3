@@ -25,7 +25,6 @@ class multiprocessing_manager(object):
         func会读取每个dict进行运算
         
         关于lock线程锁，对同一个文件进行操作时需要用到，
-        multiprocessing.Lock()需要在func中引用
         return： 返回的也是类似于input_args的格式
         """
         # 为每个进程分配一个进程锁
