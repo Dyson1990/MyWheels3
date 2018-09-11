@@ -81,7 +81,7 @@ class requests_manager(object):
         html = resp.text
         resp.close()
 		
-		print("web_code:%s\nuser_agent:%s"%(resp.encoding, self.headers['User-Agent']))
+        print("web_code:%s\nuser_agent:%s"%(resp.encoding, self.headers['User-Agent']))
         return html
 
     def get_file(self, url, targetfile):
