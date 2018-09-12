@@ -67,16 +67,17 @@ class requests_manager(object):
                         }
 
     def get_html(self, url, **kwargs):
-
+        # 设定headers信息
         headers = kwargs['headers'] if 'headers' in kwargs else self.headers
-
+        # 若传入了cookies的信息
         cookies = kwargs['cookies'] if 'cookies' in kwargs else None
 		
         self.headers['User-Agent'] = random.choice(user_agent_list)
 
         resp = requests.get(url, headers=headers, cookies=cookies)
+        # 若没传入文本编码，则让requests库自己判定编码
         resp.encoding = kwargs['charset'] if 'charset' in kwargs else resp.apparent_encoding
-        resp.raise_for_status()
+        resp.raise_for_status() # 若返回的信息中status不是200，则报错
 
         html = resp.text
         resp.close()

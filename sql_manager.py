@@ -3,7 +3,7 @@
 --------------------------------
     @Author: Dyson
     @Contact: Weaver1990@163.com
-    @file: mysql_connecter.py
+    @file: mysql_manager.py
     @time: 2017/3/15 14:23
     @info: 个人常用代码
 --------------------------------
@@ -11,6 +11,8 @@
 import traceback
 
 import sqlalchemy
+import sqlalchemy.orm
+import sqlalchemy.ext.automap
 
 import pandas as pd
 import numpy as np
@@ -18,23 +20,24 @@ from itertools import chain
 from contextlib import closing
 
 
-# log_obj = set_log.Logger('mysql_connecter.log', set_log.logging.WARNING,
+# log_obj = set_log.Logger('mysql_manager.log', set_log.logging.WARNING,
 #                          set_log.logging.DEBUG)
-# log_obj.cleanup('mysql_connecter.log', if_cleanup=True)  # 是否需要在每次运行程序前清空Log文件
+# log_obj.cleanup('mysql_manager.log', if_cleanup=True)  # 是否需要在每次运行程序前清空Log文件
 
 
 eng_str = {
         'oracle':"{db_dialect}+{db_driver}://{user}:{password}@{host}:{port}/{sid}?charset={charset}"
         , 'mysql': "{db_dialect}+{db_driver}://{user}:{password}@{host}:{port}/?charset={charset}"
         }
+# 选择数据库
 dbname_str = {
         'oracle':"ALTER SESSION SET CURRENT_SCHEMA = \"{}\""
         , 'mysql':"USE `{}`"
         }
 np_type2sql_type = {
-        np.str: sqlalchemy.CHAR(),
-        np.int64: sqlalchemy.Integer(),
-        np.float64: sqlalchemy.FLOAT(),
+        np.dtype('int64'): sqlalchemy.Integer(),
+        np.dtype('float64'): sqlalchemy.FLOAT(),
+        np.dtype('O'): sqlalchemy.CHAR(),
         }
 
 class sql_manager(object):
@@ -50,17 +53,16 @@ class sql_manager(object):
         """
         data = []
         
-        global eng_str
         sql_args = self.standardize_args(sql_args)
 
         try:
             # 使用哪种数据库，填入Oralce，MySQL等等
-            db_dialect = sql_args['db_dialect'] 
-            engine = sqlalchemy.create_engine(eng_str[db_dialect].format(**sql_args))
+            engine = self.sql_engine(sql_args)
             
             with closing(engine.connect()) as conn:
                 # 选择数据库
                 global dbname_str
+                db_dialect = sql_args['db_dialect'] 
                 conn.execute(dbname_str[db_dialect].format(sql_args['dbname']))
                 
                 # 多条SQL语句的话，循环执行
@@ -90,91 +92,93 @@ class sql_manager(object):
             return None
     
     def create_table_like_df(self, df_args, sql_args, args=None):
-        # 暂定所有字段都是字符串，默认为空白字符
+        # 模仿dataframe的样式在数据库里简历表格
         # Column('id',Integer(),primary_key=True, autoincrement=True),
+        
+        # 检验所需参数是否齐全
+        sql_args = self.standardize_args(sql_args)
         
         table_name = df_args['table_name']
         df = df_args['data']
-        primary_key = df_args['primary_key']
-        raise isinstance(df, pd.core.frame.DataFrame)
         
-        sql_table = sqlalchemy.Table(table_name,sqlalchemy.BaseModel.metadata)
+        primary_key = df_args['primary_key'] if 'primary_key' in df_args else None
         
-        for col in df.columns:
-            sql_table.append_column(
-                sqlalchemy.Column(
-                        col,
-                        np_type2sql_type(df[col].dtype),
-                        primary_key=(col == primary_key), 
-                        ),
-                )
+        if not isinstance(df, pd.core.frame.DataFrame):
+            raise Exception('DataFrame类型错误！！！')
+
+        try:
+            # 使用哪种数据库，填入Oralce，MySQL等等
+            engine = self.sql_engine(sql_args)
+
+            # 初始化元数据表格
+            metadata = sqlalchemy.schema.MetaData()
+            metadata.reflect(engine, schema=sql_args['dbname'])
+            
+            # 初始化空白表格
+            sql_table = sqlalchemy.Table(table_name, metadata)
+            
+            global np_type2sql_type
+            # 为TABLE添加列映射
+            for col in df.columns:
+                sql_table.append_column(
+                    sqlalchemy.Column(
+                            col,
+                            np_type2sql_type[df[col].dtype],
+                            primary_key=(col==primary_key), # 此列是不是主键
+                            ),
+                    )
+                    
+            # 执行建表命令
+            metadata.create_all(engine)
+        except:
+            print("数据库交互出错：%s" % traceback.format_exc())
+        
+        return None
+
+    def insert_df_data(self, df, table_name, sql_args):
+        # 从dataframe中将数据插入数据库
+
+        sql_args = self.standardize_args(sql_args)
+        
+        # 使用哪种数据库，填入Oralce，MySQL等等
+        engine = self.sql_engine(sql_args)
+        
+        # 映射到oracle的schema中
+        metadata = sqlalchemy.schema.MetaData()
+        metadata.reflect(engine, schema=sql_args['dbname'])
+
+        # print(metadata.tables.keys())
+        base = sqlalchemy.ext.automap.automap_base(metadata=metadata)
+        base.prepare(engine, reflect=True)
+# =============================================================================
+#         print(dir(base.classes))
+#         print(dir({}))
+#         print(base.classes.keys())
+# =============================================================================
+        try:
+            # 初始化会话
+            mk_session = sqlalchemy.orm.sessionmaker(bind=engine)
+            session = mk_session()
+            
+            # 查询操作
+            result = session.query(base.classes.jobs).all()
+            print(result)
+
+# =============================================================================
+#             insert_args = {'COMMIT':'WTF'}
+#             item = base.classes.jobs(**insert_args)
+#             session.add(item)
+# =============================================================================
+            
+            session.commit()
+        except:
+            session.rollback()
+            raise Exception("【insert_df_data】:fail\n{}".format(traceback.format_exc()))
+        finally:
+            session.close()
         
         
         
-
-    def create_table(self, col_names, table_name, sql_args):
-        # 暂定所有字段都是字符串，默认为空白字符
-
-        col_str = ',\n'.join(["`%s` VARCHAR(255) default ''" %s for s in col_names])
-
-        sql = """
-        CREATE TABLE IF NOT EXISTS `%s`(
-           %s
-        )ENGINE=InnoDB DEFAULT CHARSET=utf8;
-        """ %(table_name, col_str)
-
-        self.connect(sql, sql_args)
-        print("create successfully !")
-
-    def insert_df_data(self, df, table_name, sql_args, method="INSERT", fill_na=None):
-        """
-        如果在INSERT语句末尾指定了ON DUPLICATE KEY UPDATE，并且插入行后会导致在一个UNIQUE索引或PRIMARY KEY中出现重复值，
-        则在出现重复值的行执行UPDATE；如果不会导致唯一值列重复的问题，则插入新行。
-
-        此处需在df的列中加入目标表格table_name中的key，不然key默认为空白值
-
-        :param df:
-        :param table_name:
-        :param method:
-
-        :return:
-
-        举例说明
-         
-        df:
-               A      B      C
-          1   23.0  213.0    NaN
-          2  434.0    NaN  213.0
-
-        sql: INSERT INTO ``(`A`,`B`,`C`) VALUES(%s,%s,%s),(%s,%s,%s)
-
-        args: [23.0, 213.0, nan, 434.0, nan, 213.0]
-
-        """
-        # 是否需要补全缺失值
-        if fill_na != None:
-            df = df.fillna(fill_na)
-
-        # 以df的列名作为INSERT语句中的表格字段名
-        title_str = ','.join(['`%s`' %s for s in df.columns])
-
-        # 讲df中的所有除去标题以外的数据组织成一段字符串
-        data_str = ','.join(["(%s)" % (','.join(["%s", ] * df.shape[1])) for i in range(df.shape[0])])
-
-        sql = "INSERT INTO `%s`(%s) VALUES%s" %(table_name, title_str, data_str)
-
-        #print df
-        data_l = list(chain(*np.array(df).tolist()))
-        # print(data_l)
-
-        if method == 'UPDATE':
-            sql = sql + 'ON DUPLICATE KEY UPDATE ' + ','.join(['`%s`=VALUES(`%s`)' %((s,) * 2) for s in df.columns])
-            method = 'INSERT.... ON DUPLICATE KEY UPDATE'
-
-        # print(sql)
-        self.connect(sql, sql_args, args=data_l)
-        print("%s successfully !" %method)
-
     def update_df_data(self, df, table_name, index_name, sql_args, fill_na=None):
         """
         举例说明
@@ -260,28 +264,32 @@ class sql_manager(object):
             
         return sql_args
     
+    def sql_engine(self, sql_args):
+        global eng_str
+        db_dialect = sql_args['db_dialect']
+        engine = sqlalchemy.create_engine(eng_str[db_dialect].format(**sql_args))
+        return engine
     
 
 
 
 
 if __name__ == '__main__':
-    sql_connecter = sql_connecter()
+    sql_manager = sql_manager()
     
-# =============================================================================
-#     # 本地测试Oracle参数
-#     sql_args = {
-#         'db_dialect': 'oracle'
-#         , 'db_driver': 'cx_Oracle'
-#         , "host": "localhost"
-#         , "user": "Dyson"
-#         , "password": "122321"
-#         , 'sid': 'XE'
-#         , 'dbname': 'HR'
-#         , 'data_type': 'DataFrame'
-#     }
-#    print(sql_connecter.connect('SELECT JOB_ID, MIN_SALARY, COMMIT FROM JOBS', sql_args))
-# =============================================================================
+    # 本地测试Oracle参数
+    sql_args = {
+        'db_dialect': 'oracle'
+        , 'db_driver': 'cx_Oracle'
+        , "host": "localhost"
+        , "user": "Dyson"
+        , "password": "122321"
+        , 'sid': 'XE'
+        , 'dbname': 'HR'
+        , 'data_type': 'DataFrame'
+    }
+    # print(sql_manager.connect('SELECT JOB_ID, MIN_SALARY, COMMIT FROM JOBS', sql_args))
+   
 # =============================================================================
 #     # 测试本地MySQL参数
 #     sql_args = {
@@ -293,7 +301,10 @@ if __name__ == '__main__':
 #         , 'dbname': 'sakila'
 #         , 'data_type': 'DataFrame'
 #     }
-#     print(sql_connecter.connect('SELECT * FROM `actor` LIMIT 20', sql_args))
 # =============================================================================
-    print(dir(sqlalchemy.Table))
+    # print(sql_manager.connect('SELECT * FROM `actor` LIMIT 20', sql_args))
+    
+    
+    df = pd.DataFrame({})
+    sql_manager.insert_df_data(df, 'JOBS', sql_args)
 
