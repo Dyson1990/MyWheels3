@@ -27,7 +27,7 @@ from contextlib import closing
 
 eng_str = {
         'oracle':"{db_dialect}+{db_driver}://{user}:{password}@{host}:{port}/{sid}?charset={charset}"
-        , 'mysql': "{db_dialect}+{db_driver}://{user}:{password}@{host}:{port}/?charset={charset}"
+        , 'mysql': "{db_dialect}+{db_driver}://{user}:{password}@{host}:{port}/{dbname}?charset={charset}"
         }
 # 选择数据库
 dbname_str = {
@@ -142,26 +142,20 @@ class sql_manager(object):
         
         # 使用哪种数据库，填入Oralce，MySQL等等
         engine = self.sql_engine(sql_args)
-        
-        # 映射到oracle的schema中
-        metadata = sqlalchemy.schema.MetaData()
-        metadata.reflect(engine, schema=sql_args['dbname'])
-
-        # print(metadata.tables.keys())
-        base = sqlalchemy.ext.automap.automap_base(metadata=metadata)
-        base.prepare(engine, reflect=True)
-# =============================================================================
-#         print(dir(base.classes))
-#         print(dir({}))
-#         print(base.classes.keys())
-# =============================================================================
         try:
             # 初始化会话
             mk_session = sqlalchemy.orm.sessionmaker(bind=engine)
             session = mk_session()
             
+            # 映射到oracle的schema中
+            metadata = sqlalchemy.schema.MetaData()
+            metadata.reflect(engine, schema=sql_args['dbname'].lower())
+            
+            base = sqlalchemy.ext.automap.automap_base(metadata=metadata)
+            base.prepare(engine, reflect=True)
+            
             # 查询操作
-            result = session.query(base.classes.jobs).all()
+            result = session.query(base.classes.jobs.job_title).all()
             print(result)
 
 # =============================================================================
@@ -290,8 +284,8 @@ if __name__ == '__main__':
     }
     # print(sql_manager.connect('SELECT JOB_ID, MIN_SALARY, COMMIT FROM JOBS', sql_args))
    
+    # 测试本地MySQL参数
 # =============================================================================
-#     # 测试本地MySQL参数
 #     sql_args = {
 #         'db_dialect': 'MySQL'
 #         , 'db_driver': 'pymysql'
@@ -305,6 +299,6 @@ if __name__ == '__main__':
     # print(sql_manager.connect('SELECT * FROM `actor` LIMIT 20', sql_args))
     
     
-    df = pd.DataFrame({})
+    df = pd.DataFrame({'category_id':{1:'WTF'}})
     sql_manager.insert_df_data(df, 'JOBS', sql_args)
 
