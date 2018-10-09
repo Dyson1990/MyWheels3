@@ -11,8 +11,6 @@ import sys
 import os
 import random
 import requests
-import urllib.request, urllib.error, urllib.parse, sys
-import json
 
 
 user_agent_list = [
