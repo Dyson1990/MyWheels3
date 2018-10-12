@@ -13,7 +13,7 @@ class threading_manager(object):
     def __init__(self):
         pass
     
-    def run_threading(self, func, input_args, thread_count=10):
+    def run_threading(self, func, input_args, thread_count=3):
         """
         目前只支持def func(input_args, lock): 这种类型的函数
         input_args：为包含多个dict的list
@@ -78,11 +78,28 @@ class threading_class(threading.Thread):
             self.input_queue.task_done() # input_queue中队列读取完毕以后退出循环
 
 def func0(input_args, lock): 
-    return input_args
+    input_args['ser'].str.extract('({})'.format('|'.join(input_args['re_str'])))
+    return 
 
 if __name__ == '__main__':
     threading_manager = threading_manager()
-    l1 = ['|'.join([str(j*j) for j in range(i)]) for i in range(3,20)]
-    l2 = threading_manager.run_threading(func0, l1)
+    import time
+    import pandas as pd
+    import numpy as np
+    ser = pd.Series(np.random.rand(1200000),dtype=np.str)
     
-    print(list(l1) == list(l2))
+    re_str_list = list('1234567890QAZXSWEDCVFRTGBNHYUJMKILOP'*800)
+    
+    start_time = time.time()
+    l = []
+    for i in range(10):
+        l.append(func0({'ser': ser,'re_str': re_str_list[i: i*800]}, 'lock'))
+    print('单线程',time.time() - start_time)
+    
+    start_time = time.time()
+    l1 = []
+    for i in range(10):
+        l1.append({'ser': ser,'re_str': re_str_list[i: i*800]})
+    
+    l2 = threading_manager.run_threading(func0, l1)
+    print('3线程',time.time() - start_time)

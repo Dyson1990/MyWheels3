@@ -18,6 +18,7 @@ import pandas as pd
 import numpy as np
 from itertools import chain
 from contextlib import closing
+import random
 
 
 # log_obj = set_log.Logger('mysql_manager.log', set_log.logging.WARNING,
@@ -137,9 +138,8 @@ class sql_manager(object):
 
     def insert_df_data(self, df, table_name, sql_args):
         # 从dataframe中将数据插入数据库
-
         sql_args = self.standardize_args(sql_args)
-        
+
         # 使用哪种数据库，填入Oralce，MySQL等等
         engine = self.sql_engine(sql_args)
         try:
@@ -150,20 +150,17 @@ class sql_manager(object):
             # 映射到oracle的schema中
             metadata = sqlalchemy.schema.MetaData()
             metadata.reflect(engine, schema=sql_args['dbname'].lower())
-            
             base = sqlalchemy.ext.automap.automap_base(metadata=metadata)
             base.prepare(engine, reflect=True)
             
-            # 查询操作
-            result = session.query(base.classes.jobs.job_title).all()
-            print(result)
-
-# =============================================================================
-#             insert_args = {'COMMIT':'WTF'}
-#             item = base.classes.jobs(**insert_args)
-#             session.add(item)
-# =============================================================================
-            
+            # 创建插入数据的队列
+            for i in range(df.shape[0]):
+                insert_values = df.iloc[i,:].to_dict()
+                item = dict(base.classes.items())[table_name.lower()](**insert_values)
+                session.add(item)
+                
+            print('数据库插入行数：', df.shape[0])
+            # 没有发生错误，提交提交结果
             session.commit()
         except:
             session.rollback()
@@ -299,6 +296,7 @@ if __name__ == '__main__':
     # print(sql_manager.connect('SELECT * FROM `actor` LIMIT 20', sql_args))
     
     
-    df = pd.DataFrame({'category_id':{1:'WTF'}})
+    df = pd.DataFrame({"job_id":{1:'{}'.format(random.randint(1,1000)), 2:'{}'.format(random.randint(1,1000))}
+                      ,"job_title":{1:'WTF',2:'WTF'}})
     sql_manager.insert_df_data(df, 'JOBS', sql_args)
 
