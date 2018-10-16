@@ -169,9 +169,20 @@ class sql_manager(object):
             session.close()
         
     def update_df_data(self, sql_args, df, table_name, fill_na=None, **col_args):
-        # 目前只针对一个字段进行更新
+        """
+        目前针对一个列做更新
+        相当于
+        update table_name set table_col = df_col where table_key = df_key
+        df_key默认为df中的index
+        
+        col_args中必要的参数有
+        df_col：输入的dataframe中，准备更新进入数据库的列
+        table_col：数据库中需要更新数据的字段，相当于sql中的set后的数据
+        table_key：数据库中的筛选列，相当于sql中的where后的数据
+        """
+        
 
-        # 规范好参数
+        # 规范好参数，缺少参数则报错
         if 'df_col' not in col_args \
             or 'table_col' not in col_args \
             or 'table_key' not in col_args:
@@ -182,7 +193,7 @@ class sql_manager(object):
         df_col = col_args['df_col']
         df_key = col_args['df_key'] if 'df_key' in col_args else None
         
-        # 检查输入数据的规范性
+        # 检查输入数据的规范性，作为筛选字段，不能有重复值
         if df_key:
             if df[df_key].drop_duplicates().shape == df.shape[0]:
                 raise Exception('duplicate values in update_df_data key column')
@@ -191,26 +202,25 @@ class sql_manager(object):
                 raise Exception('duplicate index in update_df_data key column')
         
         table_name = table_name.lower()
-        
         sql_args = self.standardize_args(sql_args)
 
         # 使用哪种数据库，填入Oralce，MySQL等等
         engine = self.sql_engine(sql_args)
         try:
-            # 初始化会话
+            # 初始化事务
             mk_session = sqlalchemy.orm.sessionmaker(bind=engine)
             session = mk_session()
             
-            # 映射到oracle的schema中
+            # 映射到数据库中的schema
             metadata = sqlalchemy.schema.MetaData()
             metadata.reflect(engine, schema=sql_args['dbname'].lower())
             base = sqlalchemy.ext.automap.automap_base(metadata=metadata)
             base.prepare(engine, reflect=True)
             
-            # 定为到具体表格
+            # 定位到具体表格的类
             table_cls = getattr(base.classes, table_name)
             
-            # 统一原表格的格式
+            # 统一原表格（数据库）的格式
             table_col_cls = getattr(table_cls, table_col)
             table_key_cls = getattr(table_cls, table_key)
             
@@ -233,7 +243,7 @@ class sql_manager(object):
                 query0 = session.query(table_cls).filter(table_key_cls==index0)
                 query0.update({table_col_cls: target_ser.loc[index0]})
             
-            print('数据库插入行数：', df.shape[0])
+            print('数据库更新行数：', target_ser.shape[0])
             # 没有发生错误，则提交提交结果
             session.commit()
         except:
