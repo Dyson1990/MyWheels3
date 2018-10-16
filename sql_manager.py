@@ -16,7 +16,6 @@ import sqlalchemy.ext.automap
 
 import pandas as pd
 import numpy as np
-from itertools import chain
 from contextlib import closing
 import random
 
@@ -92,9 +91,15 @@ class sql_manager(object):
             print("数据库交互出错：%s" % traceback.format_exc())
             return None
     
-    def create_table_like_df(self, sql_args, df_args, args=None):
-        # 模仿dataframe的样式在数据库里简历表格
+    def create_table_like_df(self, sql_args, args=None, **df_args):
+        # 模仿dataframe的样式在数据库里建立表格
         # Column('id',Integer(),primary_key=True, autoincrement=True),
+        """
+        df_args中所需参数有
+        table_name：数据库中的表格名称
+        primary_key：需要设为主键的列名，None或缺失的话，视为不设主键
+        data：dataframe表格
+        """
         
         # 检验所需参数是否齐全
         sql_args = self.standardize_args(sql_args)
@@ -235,11 +240,13 @@ class sql_manager(object):
             target_df = pd.merge(df, table_df, how='left'
                                   , left_index=True, right_index=True
                                   , suffixes=['', '_'])
-            table_col_new = table_col + '_' if table_col == df_col else table_col
-            target_ser = target_df.loc[target_df[df_col] != target_df[table_col_new], df_col]
+            table_col_new = table_col + '_' if table_col == df_col else table_col # 应付重名时，列名的变化
+            # 只更新有变化的列，避免重复更新
+            target_ser = target_df.loc[target_df[df_col] != target_df[table_col_new], df_col] 
             
-            # 将数据插入数据库
+            # 将数据更新到数据库
             for index0 in target_ser.index:
+                # 逐行更新
                 query0 = session.query(table_cls).filter(table_key_cls==index0)
                 query0.update({table_col_cls: target_ser.loc[index0]})
             
@@ -253,25 +260,31 @@ class sql_manager(object):
             session.close()
 
     def standardize_args(self, sql_args):
-        # 检查所需参数是否都存在
-
+        # 检查所需参数是否都存在，规范输入的一些参数
+        
         if not isinstance(sql_args, dict):
             raise Exception("sql_args格式错误！！！")
+            
+        # 规范输入的大小写
+        sql_args['db_dialect'] = sql_args['db_dialect'].lower()
+        sql_args['db_driver'] = sql_args['db_driver'].lower()
         
-        if sql_args['db_dialect'].lower() == 'oracle':
+        # 不同的数据库，需要的参数不同
+        if sql_args['db_dialect'] == 'oracle':
             needed_args = ['db_dialect', 'db_driver', 'host', 'user', 'password', 'sid', 'dbname']
-        elif sql_args['db_dialect'].lower() == 'mysql':
+        elif sql_args['db_dialect'] == 'mysql':
             needed_args = ['db_dialect', 'db_driver', 'host', 'user', 'password', 'dbname']
         
+        # 缺少参数则报错
         check_args = [s for s in needed_args if s not in sql_args]
         if check_args:
             raise Exception("缺少数据库参数：%s" % '，'.join(check_args))
-
-        if 'port' not in sql_args and sql_args['db_dialect'].lower() == 'oracle':
-            sql_args['port'] = '1521'
-        if 'port' not in sql_args and sql_args['db_dialect'].lower() == 'mysql':
-            sql_args['port'] = '3306'
         
+        # 规定默认的参数的值 ##################################################
+        if 'port' not in sql_args and sql_args['db_dialect'] == 'oracle':
+            sql_args['port'] = '1521'
+        if 'port' not in sql_args and sql_args['db_dialect'] == 'mysql':
+            sql_args['port'] = '3306'
         if 'charset' not in sql_args:
             sql_args['charset'] = 'utf8'
             """
@@ -279,19 +292,16 @@ class sql_manager(object):
             也可能是数据库的编码与申请的编码不符
             1366, "Incorrect string value: '\\xD6\\xD0\\xB9\\xFA\\xB1\\xEA...' for column 'VARIABLE_VALUE' at row 484")
             """
-            
         if 'method' not in sql_args:
             # 没有参数传入，则使用fetchall
             sql_args['method'] = None
         if 'data_type' not in sql_args:
             sql_args['data_type'] = 'list'
-            
-        sql_args['db_dialect'] = sql_args['db_dialect'].lower()
-        sql_args['db_driver'] = sql_args['db_driver'].lower()
-            
+        #######################################################################
         return sql_args
     
     def sql_engine(self, sql_args):
+        # 编辑salalchemy中的数据库参数字符串
         global eng_str
         db_dialect = sql_args['db_dialect']
         engine = sqlalchemy.create_engine(eng_str[db_dialect].format(**sql_args))
