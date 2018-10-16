@@ -46,7 +46,7 @@ class sql_manager(object):
     def __init__(self):
         pass
     
-    def connect(self,sql, sql_args, args=None):
+    def connect(self, sql_args, sql, args=None):
         """
         最常用的连接MySQL的方式
         sql 可以是一条sql语句， 也可以是sql语句组成的列表
@@ -92,7 +92,7 @@ class sql_manager(object):
             print("数据库交互出错：%s" % traceback.format_exc())
             return None
     
-    def create_table_like_df(self, df_args, sql_args, args=None):
+    def create_table_like_df(self, sql_args, df_args, args=None):
         # 模仿dataframe的样式在数据库里简历表格
         # Column('id',Integer(),primary_key=True, autoincrement=True),
         
@@ -136,7 +136,7 @@ class sql_manager(object):
         
         return None
 
-    def insert_df_data(self, df, table_name, sql_args):
+    def insert_df_data(self, sql_args, df, table_name):
         # 从dataframe中将数据插入数据库
         sql_args = self.standardize_args(sql_args)
 
@@ -160,7 +160,7 @@ class sql_manager(object):
                 session.add(item)
                 
             print('数据库插入行数：', df.shape[0])
-            # 没有发生错误，提交提交结果
+            # 没有发生错误，则提交提交结果
             session.commit()
         except:
             session.rollback()
@@ -168,53 +168,79 @@ class sql_manager(object):
         finally:
             session.close()
         
+    def update_df_data(self, sql_args, df, table_name, fill_na=None, **col_args):
+        # 目前只针对一个字段进行更新
+
+        # 规范好参数
+        if 'df_col' not in col_args \
+            or 'table_col' not in col_args \
+            or 'table_key' not in col_args:
+            raise Exception('df_col or table_col or table_key not given in update_df_data')
+            
+        table_col = col_args['table_col'].lower()
+        table_key = col_args['table_key'].lower()
+        df_col = col_args['df_col']
+        df_key = col_args['df_key'] if 'df_key' in col_args else None
         
+        # 检查输入数据的规范性
+        if df_key:
+            if df[df_key].drop_duplicates().shape == df.shape[0]:
+                raise Exception('duplicate values in update_df_data key column')
+        else:
+            if df.index.drop_duplicates().shape == df.shape[0]:
+                raise Exception('duplicate index in update_df_data key column')
         
-    def update_df_data(self, df, table_name, index_name, sql_args, fill_na=None):
-        """
-        举例说明
-        df:
-               A      B      C
-        1   23.0  213.0    NaN
-        2  434.0    NaN  213.0
-
-        sql:
-        UPDATE  
-        SET `C` = CASE `A` 
-        WHEN '1' THEN '0.0'
-        WHEN '2' THEN '213.0'
-        END,
-        `A` = CASE `A` 
-        WHEN '1' THEN '23.0'
-        WHEN '2' THEN '434.0'
-        END,
-        `B` = CASE `A` 
-        WHEN '1' THEN '213.0'
-        WHEN '2' THEN '0.0'
-        END
-        WHERE `A` IN ('1','2')
-
-        """
-        # 是否需要补全缺失值
-        if fill_na != None:
-            df = df.fillna(fill_na)
-
-
-        sql = "UPDATE %s \n SET " % table_name
-        d = df.to_dict()
-        #print d
-        sql_list = []
-        for key in d:
-            d0 = d[key]
-            l = ["WHEN '%s' THEN '%s'" % (key0, d0[key0]) for key0 in d0]
-            sql1 = "`%s` = CASE `%s` \n%s" % (key, index_name, '\n'.join(l))
-            sql_list.append(sql1 + '\nEND')
-        sql = sql + ',\n'.join(sql_list) + "\nWHERE `%s` IN (%s)" %(index_name, ','.join(["'%s'" %s for s in df.index.tolist()]))
+        table_name = table_name.lower()
         
-        print(sql)
+        sql_args = self.standardize_args(sql_args)
 
-        self.connect(sql, sql_args)
-        print("UPDATE successfully !")
+        # 使用哪种数据库，填入Oralce，MySQL等等
+        engine = self.sql_engine(sql_args)
+        try:
+            # 初始化会话
+            mk_session = sqlalchemy.orm.sessionmaker(bind=engine)
+            session = mk_session()
+            
+            # 映射到oracle的schema中
+            metadata = sqlalchemy.schema.MetaData()
+            metadata.reflect(engine, schema=sql_args['dbname'].lower())
+            base = sqlalchemy.ext.automap.automap_base(metadata=metadata)
+            base.prepare(engine, reflect=True)
+            
+            # 定为到具体表格
+            table_cls = getattr(base.classes, table_name)
+            
+            # 统一原表格的格式
+            table_col_cls = getattr(table_cls, table_col)
+            table_key_cls = getattr(table_cls, table_key)
+            
+            table_df = pd.DataFrame(session.query(table_key_cls, table_col_cls).all())
+            table_df = table_df.set_index(table_key)
+            
+            # 统一dataframe的格式
+            if isinstance(df_key, str):
+                df = df.set_index(df_key)
+            
+            # 筛选需要插入的数据
+            target_df = pd.merge(df, table_df, how='left'
+                                  , left_index=True, right_index=True
+                                  , suffixes=['', '_'])
+            table_col_new = table_col + '_' if table_col == df_col else table_col
+            target_ser = target_df.loc[target_df[df_col] != target_df[table_col_new], df_col]
+            
+            # 将数据插入数据库
+            for index0 in target_ser.index:
+                query0 = session.query(table_cls).filter(table_key_cls==index0)
+                query0.update({table_col_cls: target_ser.loc[index0]})
+            
+            print('数据库插入行数：', df.shape[0])
+            # 没有发生错误，则提交提交结果
+            session.commit()
+        except:
+            session.rollback()
+            raise Exception("【insert_df_data】:fail\n{}".format(traceback.format_exc()))
+        finally:
+            session.close()
 
     def standardize_args(self, sql_args):
         # 检查所需参数是否都存在
@@ -296,7 +322,13 @@ if __name__ == '__main__':
     # print(sql_manager.connect('SELECT * FROM `actor` LIMIT 20', sql_args))
     
     
-    df = pd.DataFrame({"job_id":{1:'{}'.format(random.randint(1,1000)), 2:'{}'.format(random.randint(1,1000))}
-                      ,"job_title":{1:'WTF',2:'WTF'}})
-    sql_manager.insert_df_data(df, 'JOBS', sql_args)
+# =============================================================================
+#     df = pd.DataFrame({"job_id":{1:'{}'.format(random.randint(1,1000)), 2:'{}'.format(random.randint(1,1000))}
+#                       ,"job_title":{1:'WTF',2:'WTF'}})
+# =============================================================================
+    df = pd.DataFrame({"job_id":{1:'AD_VP', 2:'AD_ASST'}
+                      ,"commit":{1:'NEW{}'.format(random.randint(1,1000)),2:'NEW{}'.format(random.randint(1,1000))}})
+    sql_manager.update_df_data(sql_args, df, 'JOBS'
+                               , df_col='commit', table_col='commit'
+                               , df_key='job_id', table_key='job_id')
 
