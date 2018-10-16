@@ -3,9 +3,9 @@
 --------------------------------
     @Author: Dyson
     @Contact: Weaver1990@163.com
-    @file: mysql_manager.py
+    @file: sql_manager.py
     @time: 2017/3/15 14:23
-    @info: 个人常用代码
+    @info: 个人常用代码，由于处于学习阶段，不打算用pandas中的read_csv、to_csv
 --------------------------------
 """
 import traceback
@@ -80,7 +80,7 @@ class sql_manager(object):
                 # 修改返回数据的类型
                 if sql_args['data_type'] == 'list':
                     data = [list(t) for t in data]
-                elif sql_args['data_type'] in ('DataFrame', 'dataframe'):
+                elif sql_args['data_type'].lower() == 'dataframe':
                     data = [list(t) for t in data] # 要求传入列表，不能是
                     data = pd.DataFrame(data, columns=rp.keys())
                 else:
@@ -88,7 +88,7 @@ class sql_manager(object):
                     
                 return data
         except:
-            print("数据库交互出错：%s" % traceback.format_exc())
+            print("数据库交互出错：\n%s" % traceback.format_exc())
             return None
     
     def create_table_like_df(self, sql_args, args=None, **df_args):
@@ -172,8 +172,9 @@ class sql_manager(object):
             raise Exception("【insert_df_data】:fail\n{}".format(traceback.format_exc()))
         finally:
             session.close()
+        return None
         
-    def update_df_data(self, sql_args, df, table_name, fill_na=None, **col_args):
+    def update_df_data(self, sql_args, df, table_name, **col_args):
         """
         目前针对一个列做更新
         相当于
@@ -258,6 +259,7 @@ class sql_manager(object):
             raise Exception("【insert_df_data】:fail\n{}".format(traceback.format_exc()))
         finally:
             session.close()
+        return None
 
     def standardize_args(self, sql_args):
         # 检查所需参数是否都存在，规范输入的一些参数
