@@ -18,6 +18,8 @@ import selenium.webdriver
 from selenium.webdriver.support.select import Select as webdriver_select
 import random
 
+import platform
+
 
 
 
@@ -63,7 +65,14 @@ user_agent_list = [
 
 class driver_manager(object):
     def __init__(self):
-        pass
+        self.user_agent = random.choice(user_agent_list)
+        self.headers = {'Accept': '*/*',
+                        'Accept-Language': 'en-US,en;q=0.8',
+                        'Cache-Control': 'max-age=0',
+                        'User-Agent': self.user_agent,
+                        # 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36',
+                        'Connection': 'keep-alive'
+                        }
 
     def initialization(self, engine_path, time_out=180, **kwargs):
         # 初始化一个网页浏览器，根据传入的参数选择使用哪个浏览器，目前支持chrome
@@ -84,8 +93,12 @@ class driver_manager(object):
         options = selenium.webdriver.ChromeOptions()
         # options.add_experimental_option("excludeSwitches", ["ignore-certificate-errors"])
         options.add_argument("--headless")
+        for key in self.headers:
+            s = '{}="{}"'.format(key, self.headers[key])
+            options.add_argument(s)
         driver = selenium.webdriver.Chrome(executable_path=engine_path
-                                           , chrome_options=options)
+                                           # , chrome_options=options)
+                                           , options=options)
 
         #display.stop()
         driver.set_window_size(1920, 1080)
@@ -93,6 +106,7 @@ class driver_manager(object):
 
 
     def get_html(self, url, engine_path):
+        # 由url得到对应的html代码
         driver = self.initialization(engine_path)
         driver.get('about:blank')
         driver.get(url)
@@ -104,6 +118,25 @@ class driver_manager(object):
 
 if __name__ == '__main__':
     driver_manager = driver_manager()
+    
+    sysstr = platform.system()
+    if sysstr == 'Windows':
+        engine_path = os.path.join(os.getcwd()
+                                 , 'selenium_driver'
+                                 , 'chromedriver_win32.exe')
+    elif sysstr == 'Linux':
+        engine_path = os.path.join(os.getcwd()
+                                 , 'selenium_driver'
+                                 , 'chromedriver_linux64')
+    else:
+        raise Exception('unknown system')
+        
+    driver = driver_manager.chromedriver(engine_path)
+    
+    driver.get('https://www.baidu.com')
+    print(driver.page_source)
+    
+    
 
     
     
