@@ -184,18 +184,20 @@ class sql_manager(object):
         col_args中必要的参数有
         df_col：输入的dataframe中，准备更新进入数据库的列
         table_col：数据库中需要更新数据的字段，相当于sql中的set后的数据
-        table_key：数据库中的筛选列，相当于sql中的where后的数据
+        table_keys：数据库中的筛选列，相当于sql中的where后的数据
         """
         
 
         # 规范好参数，缺少参数则报错
         if 'df_col' not in col_args \
             or 'table_col' not in col_args \
-            or 'table_key' not in col_args:
-            raise Exception('df_col or table_col or table_key not given in update_df_data')
+            or 'table_keys' not in col_args:
+            raise Exception('df_col or table_col or table_keys not given in update_df_data')
             
         table_col = col_args['table_col'].lower()
-        table_key = col_args['table_key'].lower()
+        table_keys = col_args['table_keys']
+        table_keys = [s.lower() for s in table_keys] \
+                     if isinstance(table_keys, list) else [table_keys.lower()]
         df_col = col_args['df_col']
         df_key = col_args['df_key'] if 'df_key' in col_args else None
         
@@ -227,11 +229,13 @@ class sql_manager(object):
             table_cls = getattr(base.classes, table_name)
             
             # 统一原表格（数据库）的格式
+            cls_list = []
             table_col_cls = getattr(table_cls, table_col)
-            table_key_cls = getattr(table_cls, table_key)
+            cls_list.append(table_col_cls)
+            for table_key in table_keys:
+                cls_list.append(getattr(table_cls, table_key))
             
-            table_df = pd.DataFrame(session.query(table_key_cls, table_col_cls).all())
-            table_df = table_df.set_index(table_key)
+            table_df = pd.DataFrame(session.query(*cls_list).all())
             
             # 统一dataframe的格式
             if isinstance(df_key, str):
@@ -239,19 +243,22 @@ class sql_manager(object):
             
             # 筛选需要插入的数据
             target_df = pd.merge(df, table_df, how='left'
-                                  , left_index=True, right_index=True
+                                  , on=table_keys # left_index=True, right_index=True
                                   , suffixes=['', '_'])
             table_col_new = table_col + '_' if table_col == df_col else table_col # 应付重名时，列名的变化
             # 只更新有变化的列，避免重复更新
-            target_ser = target_df.loc[target_df[df_col] != target_df[table_col_new], df_col] 
+            target_df = target_df.loc[target_df[df_col] != target_df[table_col_new], :]
             
             # 将数据更新到数据库
-            for index0 in target_ser.index:
+            for index0 in target_df.index:
                 # 逐行更新
-                query0 = session.query(table_cls).filter(table_key_cls==index0)
-                query0.update({table_col_cls: target_ser.loc[index0]})
+                filter_list = [col == target_df.loc[index0, col] for col in table_keys]
+                query0 = session.query(table_cls).filter(sqlalchemy.and_(*filter_list))
+                print({table_col_cls: target_df.loc[index0, df_col]})
+                query0.update({table_col_cls: target_df.loc[index0, df_col]}
+                              , synchronize_session=False)
             
-            print('数据库更新行数：', target_ser.shape[0])
+            print('数据库更新行数：', target_df.shape[0])
             # 没有发生错误，则提交提交结果
             session.commit()
         except:
@@ -352,5 +359,5 @@ if __name__ == '__main__':
                       ,"commit":{1:'NEW{}'.format(random.randint(1,1000)),2:'NEW{}'.format(random.randint(1,1000))}})
     sql_manager.update_df_data(sql_args, df, 'JOBS'
                                , df_col='commit', table_col='commit'
-                               , df_key='job_id', table_key='job_id')
+                               , df_key='job_id', table_keys='job_id')
 
