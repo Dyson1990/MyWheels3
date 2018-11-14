@@ -133,8 +133,10 @@ if __name__ == '__main__':
         
     driver = driver_manager.chromedriver(engine_path)
     
-    driver.get('https://www.baidu.com')
-    print(driver.page_source)
+    driver.get('http://hd.chinatax.gov.cn/fagui/action/InitCredit.do')
+    driver.find_element_by_xpath('/html/body/table[1]/tbody/tr/td[3]/table[2]/tbody/tr/td/table[2]/tbody/tr/td/table/tbody/tr[1]/td[1]/a').click()
+    with codecs.open('test.html', 'w', 'utf-8') as f:
+        f.write(driver.page_source)
     
     
 

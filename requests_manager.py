@@ -91,4 +91,7 @@ class requests_manager(object):
 
 if __name__ == '__main__':
     requests_manager = requests_manager()
+    s = requests_manager.get_html('http://hd.chinatax.gov.cn/fagui/action/InitCredit.do')
+    with open('test.html', 'w') as f:
+        f.write(s)
 

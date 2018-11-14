@@ -14,7 +14,7 @@ import os
 file_dir = {}
 times = 0
 
-def dirsTree(startPath):
+def dirs_tree(startPath):
     startPath = os.path.normpath(startPath)
     # f = open('Folder(%s)_Tree.txt' %os.path.split(startPath)[1], 'w')
     f = open('Folder_Tree.txt', 'w')
@@ -30,7 +30,7 @@ def dirsTree(startPath):
         #第三层 '| | | '
         #依此类推...
         #在每一层结束时，合并输出 '|____'
-        indent_dir = '| ' * 1 * level + '|____'
+        indent_dir = '|*' * 1 * level + '|--'
         # if files:
         #     content = '%s%s ---files included:%s \n' % (indent, os.path.split(
         #                         root)[1], files)
@@ -49,6 +49,30 @@ def dirsTree(startPath):
                 f.write(content)
     f.close()
 
+def dirs_tree_filtered(startPath):
+    startPath = os.path.normpath(startPath)
+    tree = ''
+    tree_ignore = []
+    for root, dirs, files in os.walk(startPath):
+        if root in tree_ignore:
+            for dir0 in dirs:
+                tree_ignore.append(os.path.join(root, dir0))
+            continue
+        for dir0 in dirs:
+            if re.search(r'\.|__', dir0):
+                tree_ignore.append(os.path.join(root, dir0))
+        level = root.replace(startPath, '').count(os.sep)
+        indent_dir = '|*' * 1 * level + '|--'
+        dir_content = '%s%s\\\n' % (indent_dir, os.path.split(root)[1])
+        tree = tree + dir_content
+        if files:
+            for file in files:
+                indent_file = ' ' * (len(os.path.split(root)[1])+ len(indent_dir)) + '|_'
+                content = '%s%s\n' % (indent_file,file)
+                tree = tree + content
+    
+    return tree	
+	
 if __name__ == '__main__':
     # dir = raw_input('please input the path:')
     # dir = r'E:\Download\新建文件夹'
