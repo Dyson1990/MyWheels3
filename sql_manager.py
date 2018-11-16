@@ -44,6 +44,8 @@ sql_type2np_type = {
         sqlalchemy.FLOAT: np.dtype('float64'),
         sqlalchemy.CHAR: np.dtype('O'),
         sqlalchemy.dialects.oracle.base.NUMBER: np.dtype('float64'),
+        sqlalchemy.dialects.oracle.base.INTEGER: np.dtype('int64'),
+        sqlalchemy.dialects.oracle.base.DATE: np.dtype('datetime64[ns]'),
         sqlalchemy.sql.sqltypes.VARCHAR: np.dtype('O'),
         }
 
@@ -232,13 +234,15 @@ class sql_manager(object):
             or 'df_keys' not in col_args \
             or 'table_keys' not in col_args:
             raise Exception('df_col or table_col or table_keys not given in update_df_data')
-        
+
+        # 规范输入字段的大小写
         df.columns = [s.lower() for s in df.columns]
         
         table_col = col_args['table_col'].lower()
         table_keys = col_args['table_keys']
         table_keys = [s.lower() for s in table_keys] \
                      if isinstance(table_keys, list) else [table_keys.lower()]
+                         
         df_col = col_args['df_col'].lower()
         df_keys = col_args['df_keys']
         df_keys = [s.lower() for s in df_keys] \
@@ -268,12 +272,13 @@ class sql_manager(object):
             base = sqlalchemy.ext.automap.automap_base(metadata=metadata)
             base.prepare(engine, reflect=True)
             
-            # 定位到具体表格的类
+            # 定位到目标数据表的Python类
             table_cls = getattr(base.classes, table_name)
             
             # 将数据中的字段对象存入列表，以供检验判断等
             cls_list = [] 
             table_col_cls = getattr(table_cls, table_col) # 目标字段
+            
             
             cls_list.append(table_col_cls)
             table_keys_cls = [] # 筛选字段
@@ -286,10 +291,15 @@ class sql_manager(object):
             col_element_set = table_col_cls.desc().element.proxy_set.copy()
             table_col_type = col_element_set.pop().type
             if sql_type2np_type[type(table_col_type)] != df[df_col].dtype:
-                raise Exception('data type not match in update_df_data target column')
+                s1 = type(table_col_type)
+                s2 = df[df_col].dtype
+                error_str = 'data type not match in update_df_data' \
+                            'target column\ndb_type:{}\ndf_type:{}'.format(s1, s2)
+                raise Exception(error_str)
 
 
             table_df = pd.DataFrame(session.query(*cls_list).all())
+            print(col_element_set)
                         
             # 筛选需要插入的数据
             target_df = pd.merge(df, table_df, how='left'
@@ -406,9 +416,11 @@ if __name__ == '__main__':
 #     df = pd.DataFrame({"job_id":{1:'{}'.format(random.randint(1,1000)), 2:'{}'.format(random.randint(1,1000))}
 #                       ,"job_title":{1:'WTF',2:'WTF'}})
 # =============================================================================
+    #import datetime
     df = pd.DataFrame({"FIRST_NAME":{1:'Daniel', 2:'David'}
                       , "LAST_NAME":{1:'Faviet', 2:'Lee'}
-                      , "test":{1:'NEW{}'.format(random.randint(1,1000)),2:'NEW{}'.format(random.randint(1,1000))}})
+                      #, "test":{1:'NEW{}'.format(random.randint(1,1000)),2:'NEW{}'.format(random.randint(1,1000))}})
+                      , "test":{1:random.randint(1,1000),2:None}})
     sql_manager.update_df_data(sql_args, df, 'EMPLOYEES'
                                , df_col='test', table_col='test'
                                , df_keys=['FIRST_NAME', "LAST_NAME"], table_keys=['FIRST_NAME', "LAST_NAME"])

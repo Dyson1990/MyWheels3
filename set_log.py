@@ -3,14 +3,12 @@
 """
 @version: beta2
 @author: Dyson
-@software: PyCharm Community Edition
 @file: set_log.py
 @time: 2016/7/28 17:46
 @info: 个人常用代码
 """
 import logging,os
 import ctypes
-import random
 import sys
 
 
@@ -25,8 +23,6 @@ std_out_handle = ctypes.windll.kernel32.GetStdHandle(STD_OUTPUT_HANDLE)
 def set_color(color, handle=std_out_handle):
     bool = ctypes.windll.kernel32.SetConsoleTextAttribute(handle, color)
     return bool
-
-
 
 class Logger:
     def __init__(self, path,clevel = logging.DEBUG,Flevel = logging.DEBUG):
@@ -46,12 +42,7 @@ class Logger:
         self.logger.addHandler(fh)
 
     def debug(self,message):
-        try:
-            message = message.encode('utf-8')
-        except:
-            pass
         self.logger.debug(message)
-
 
     def info(self,message):
         self.logger.info(message)
@@ -63,10 +54,6 @@ class Logger:
 
     def error(self,message,color=FOREGROUND_RED):
         set_color(color)
-        try:
-            message = message.encode('utf-8')
-        except:
-            pass
         self.logger.error(message)
         set_color(FOREGROUND_WHITE)
 
@@ -76,15 +63,15 @@ class Logger:
     def cleanup(self,file_name,if_cleanup = True):
         #file_path = os.path.abspath(file_name)
         if os.path.exists(file_name) and if_cleanup:
-            f = open(file_name, 'w')
-            f.truncate()
-            f.close()
-
+            with open(file_name, 'w') as f:
+                f.truncate()
 
 
 
 if __name__ =='__main__':
-    pass
+    log_path = r'C:\Users\gooddata\test.log'
+    log_obj = Logger(log_path)
+    log_obj.cleanup(log_path, if_cleanup=False) # 是否需要在每次运行程序前清空Log文件
     # logyyx = Logger('yyx.log',logging.WARNING,logging.DEBUG)
     # logyyx.debug('一个debug信息')
     # logyyx.info('一个info信息')
