@@ -66,8 +66,6 @@ class Logger:
             with open(file_name, 'w') as f:
                 f.truncate()
 
-
-
 if __name__ =='__main__':
     log_path = r'C:\Users\gooddata\test.log'
     log_obj = Logger(log_path)
