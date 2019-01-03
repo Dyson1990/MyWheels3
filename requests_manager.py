@@ -11,6 +11,7 @@ import sys
 import os
 import random
 import requests
+import codecs
 
 
 user_agent_list = [
@@ -63,16 +64,36 @@ class requests_manager(object):
                         # 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36',
                         'Connection': 'keep-alive'
                         }
+        
+    def ping_url(self, url):
+        # 若ping的响应时间在一秒内，则返回True
+        backinfo = os.system('ping -w 1 {}'.format(url))
+        if backinfo == 1:
+            return False
+        elif backinfo == 0:
+            return True
 
     def get_html(self, url, **kwargs):
         # 设定headers信息
         headers = kwargs['headers'] if 'headers' in kwargs else self.headers
         # 若传入了cookies的信息
         cookies = kwargs['cookies'] if 'cookies' in kwargs else None
+        # 若传入了proxy_pool的路径，则读取代理池
+        # 代理池提取位置https://ip.ihuan.me/ti.html
+        if 'proxy_pool' in kwargs and os.path.exists(kwargs['proxy_pool']):
+            with open(kwargs['proxy_pool'], 'r') as f:
+                proxy_list = f.read().split('\n')
+            proxies = random.choice(proxy_list)
+            proxies = {'https':'http://{}'.format(proxies)}
+        else:
+            proxies = None
 		
         self.headers['User-Agent'] = random.choice(user_agent_list)
-
-        resp = requests.get(url, headers=headers, cookies=cookies)
+        
+        resp = requests.get(url
+                            , headers=headers
+                            , cookies=cookies
+                            , proxies = proxies)
         # 若没传入文本编码，则让requests库自己判定编码
         resp.encoding = kwargs['charset'] if 'charset' in kwargs else resp.apparent_encoding
         resp.raise_for_status() # 若返回的信息中status不是200，则报错
@@ -91,7 +112,12 @@ class requests_manager(object):
 
 if __name__ == '__main__':
     requests_manager = requests_manager()
-    s = requests_manager.get_html('http://hd.chinatax.gov.cn/fagui/action/InitCredit.do')
-    with open('test.html', 'w') as f:
+    ip = requests_manager.get_html('http://icanhazip.com'
+                                  , proxy_pool = r'C:\Users\gooddata\Desktop\proxy_pool.txt')
+    print('ip地址为：{}'.format(ip))
+    s = requests_manager.get_html('https://www.baidu.com/baidu?tn=monline_3_dg&ie=utf-8&wd=ip'
+                                  , proxy_pool = r'C:\Users\gooddata\Desktop\proxy_pool.txt')
+    with codecs.open('test.html', 'w', 'utf-8') as f:
         f.write(s)
+    #print(requests_manager.ping_url('www.baidu.com'))
 
