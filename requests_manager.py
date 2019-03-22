@@ -84,7 +84,8 @@ class requests_manager(object):
             with open(kwargs['proxy_pool'], 'r') as f:
                 proxy_list = f.read().split('\n')
             proxies = random.choice(proxy_list)
-            proxies = {'https':'http://{}'.format(proxies)}
+            proxies = {'http':'http://{}'.format(proxies)
+                      ,'https':'http://{}'.format(proxies)}
         else:
             proxies = None
 		
@@ -112,12 +113,12 @@ class requests_manager(object):
 
 if __name__ == '__main__':
     requests_manager = requests_manager()
-    ip = requests_manager.get_html('http://icanhazip.com'
+    ip = requests_manager.get_html('https://icanhazip.com'
                                   , proxy_pool = r'C:\Users\gooddata\Desktop\proxy_pool.txt')
     print('ip地址为：{}'.format(ip))
-    s = requests_manager.get_html('https://www.baidu.com/baidu?tn=monline_3_dg&ie=utf-8&wd=ip'
+    s = requests_manager.get_html('http://lhnb.mofcom.gov.cn/publicity/info?id=1264473'
                                   , proxy_pool = r'C:\Users\gooddata\Desktop\proxy_pool.txt')
-    with codecs.open('test.html', 'w', 'utf-8') as f:
+    with codecs.open('test_requests.html', 'w', 'utf-8') as f:
         f.write(s)
     #print(requests_manager.ping_url('www.baidu.com'))
 
