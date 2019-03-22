@@ -13,11 +13,13 @@ import traceback
 import sqlalchemy
 import sqlalchemy.orm
 import sqlalchemy.ext.automap
+import sqlalchemy.dialects.oracle
 
 import pandas as pd
 import numpy as np
 from contextlib import closing
 import random
+import codecs
 
 
 # log_obj = set_log.Logger('mysql_manager.log', set_log.logging.WARNING,
@@ -35,18 +37,27 @@ dbname_str = {
         , 'mysql':"USE `{}`"
         }
 np_type2sql_type = {
-        np.dtype('int64'): sqlalchemy.Integer,
-        np.dtype('float64'): sqlalchemy.FLOAT,
-        np.dtype('O'): sqlalchemy.CHAR,
+        np.dtype('int64'): sqlalchemy.sql.sqltypes.Integer
+        , np.dtype('float64'): sqlalchemy.sql.sqltypes.FLOAT
+        , np.dtype('O'): sqlalchemy.sql.sqltypes.VARCHAR
         }
 sql_type2np_type = {
-        sqlalchemy.Integer: np.dtype('int64'),
-        sqlalchemy.FLOAT: np.dtype('float64'),
-        sqlalchemy.CHAR: np.dtype('O'),
-        sqlalchemy.dialects.oracle.base.NUMBER: np.dtype('float64'),
-        sqlalchemy.dialects.oracle.base.INTEGER: np.dtype('int64'),
-        sqlalchemy.dialects.oracle.base.DATE: np.dtype('datetime64[ns]'),
-        sqlalchemy.sql.sqltypes.VARCHAR: np.dtype('O'),
+        sqlalchemy.sql.sqltypes.FLOAT: np.dtype('float64')
+        , sqlalchemy.sql.sqltypes.Integer: np.dtype('int64')
+        , sqlalchemy.sql.sqltypes.DateTime: np.dtype('datetime64[ns]')
+        , sqlalchemy.sql.sqltypes.VARCHAR: np.dtype('O')
+        }
+np_type2oracle_type = {
+        np.dtype('int64'): sqlalchemy.dialects.oracle.base.INTEGER
+        , np.dtype('float64'): sqlalchemy.dialects.oracle.base.FLOAT
+        , np.dtype('O'): sqlalchemy.dialects.oracle.base.VARCHAR2
+        }
+oracle_type2np_type = {
+        sqlalchemy.dialects.oracle.base.FLOAT: np.dtype('float64')
+        , sqlalchemy.dialects.oracle.base.INTEGER: np.dtype('int64')
+        , sqlalchemy.dialects.oracle.base.DATE: np.dtype('datetime64[ns]')
+        , sqlalchemy.dialects.oracle.base.VARCHAR2: np.dtype('O')
+        , sqlalchemy.dialects.oracle.base.NUMBER: np.dtype('float64')
         }
 
 class sql_manager(object):
@@ -108,6 +119,7 @@ class sql_manager(object):
         table_name：数据库中的表格名称
         primary_key：需要设为主键的列名，None或缺失的话，视为不设主键
         data：dataframe表格
+        size: 字段大小，缺失的话默认为20
         """
         
         # 检验所需参数是否齐全
@@ -115,6 +127,7 @@ class sql_manager(object):
         
         table_name = df_args['table_name']
         df = df_args['data']
+        size = df_args['size'] if 'size' in df_args else 20
         
         primary_key = df_args['primary_key'] if 'primary_key' in df_args else None
         
@@ -138,7 +151,7 @@ class sql_manager(object):
                 sql_table.append_column(
                     sqlalchemy.Column(
                             col,
-                            np_type2sql_type[df[col].dtype](),
+                            np_type2sql_type[df[col].dtype](size),
                             primary_key=(col==primary_key), # 此列是不是主键
                             ),
                     )
@@ -150,20 +163,42 @@ class sql_manager(object):
         
         return None
     
-    def insert_df_data(self, sql_args, df, table_name, commit_size=None):
+    def update_df_data(self, sql_args, df, table_name, commit_size=None, df_to_sql=None, **col_args):
         """     
         commit_size如果是个整数，那么就将df分批插入
         分段提交有风险，第一批提交完了，第二次提交出错的话，没法回滚第一次提交的数据
+        
+        若col_args不为None
+        col_args中必要的参数有
+        df_col：输入的dataframe中，准备更新进入数据库的列
+        table_col：数据库中需要更新数据的字段，相当于sql中的set后的数据
+        table_keys：数据库中的筛选列，相当于sql中的where后的数据
+        df_keys: 与table_keys对应的参数
+        
+        这时相当于
+        update table_name set table_col = df_col where table_key = df_keys
+        
+        df_to_sql的布尔值不为False的话，就使用to_sql插入数据
         """
+        if col_args:
+            func = self.__update_df_data
+        elif df_to_sql:
+            func = self.__df_to_sql
+        else:
+            func = self.__insert_df_data
+        
         if isinstance(commit_size, int):
             i = 0
             while True:
-                df0 = df.iloc[i * commit_size, (i+1) * commit_size]
+                lower0 = min(df.shape[0], i * commit_size)
+                upper0 = min(df.shape[0], (i+1) * commit_size)
+                print('分段上传到数据库：目前[{}, {}]'.format(lower0, upper0))
+                df0 = df.iloc[lower0:upper0, :]
                 if df0.empty:
                     break
-                self.__insert_df_data(sql_args, df, table_name)
+                func(sql_args, df0, table_name, **col_args)
         else:
-            self.__insert_df_data(sql_args, df, table_name)
+            func(sql_args, df, table_name, **col_args)
         
         return None
 
@@ -184,6 +219,8 @@ class sql_manager(object):
             base = sqlalchemy.ext.automap.automap_base(metadata=metadata)
             base.prepare(engine, reflect=True)
             
+            df = df.rename(columns={s: s.lower() for s in df.columns})
+            print(dict(base.classes.items()))
             # 创建插入数据的队列
             for i in range(df.shape[0]):
                 insert_values = df.iloc[i,:].to_dict()
@@ -199,32 +236,42 @@ class sql_manager(object):
         finally:
             session.close()
         return None
-        
-    def update_df_data(self, sql_args, df, table_name, commit_size=None, **col_args):
-        """
-        相当于
-        update table_name set table_col = df_col where table_key = df_keys
-        
-        commit_size如果是个整数，那么就将df分批更新
-        分段提交有风险，第一批提交完了，第二次提交出错的话，没法回滚第一次提交的数据
-        
-        col_args中必要的参数有
-        df_col：输入的dataframe中，准备更新进入数据库的列
-        table_col：数据库中需要更新数据的字段，相当于sql中的set后的数据
-        table_keys：数据库中的筛选列，相当于sql中的where后的数据
-        df_keys: 与table_keys对应的参数
-        """
-        if isinstance(commit_size, int):
-            i = 0
-            while True:
-                df0 = df.iloc[i * commit_size, (i+1) * commit_size]
-                if df0.empty:
-                    break
-                self.__update_df_data(sql_args, df, table_name, **col_args)
-        else:
-            self.__update_df_data(sql_args, df, table_name, **col_args)
-        
+    
+    def __df_to_sql(self, sql_args, df, table_name, **col_args):
+        # 从dataframe中将数据插入数据库
+        sql_args = self.__standardize_args(sql_args)
+
+        # 使用哪种数据库，填入Oralce，MySQL等等
+        engine = self.__sql_engine(sql_args)
+        try:
+            df.to_sql(table_name, engine, index=False, if_exists='append')
+        except:
+            raise Exception("【insert_df_data】:fail\n{}".format(traceback.format_exc()))
         return None
+        
+# =============================================================================
+#     def 
+#         """
+#         相当于
+#         update table_name set table_col = df_col where table_key = df_keys
+#         
+#         commit_size如果是个整数，那么就将df分批更新
+#         分段提交有风险，第一批提交完了，第二次提交出错的话，没法回滚第一次提交的数据
+#         
+# 
+#         """
+#         if isinstance(commit_size, int):
+#             i = 0
+#             while True:
+#                 df0 = df.iloc[i * commit_size, (i+1) * commit_size]
+#                 if df0.empty:
+#                     break
+#                 self.__update_df_data(sql_args, df0, table_name, **col_args)
+#         else:
+#             self.__update_df_data(sql_args, df, table_name, **col_args)
+#         
+#         return None
+# =============================================================================
         
     def __update_df_data(self, sql_args, df, table_name, **col_args):
 
@@ -299,7 +346,7 @@ class sql_manager(object):
 
 
             table_df = pd.DataFrame(session.query(*cls_list).all())
-            print(col_element_set)
+            #print(col_element_set)
                         
             # 筛选需要插入的数据
             target_df = pd.merge(df, table_df, how='left'
@@ -316,7 +363,11 @@ class sql_manager(object):
                 # 逐行更新
                 filter_list = [cls0 == target_df.loc[index0, cls0.name] for cls0 in table_keys_cls]
                 query0 = session.query(table_cls).filter(sqlalchemy.and_(*filter_list))
-                query0.update({table_col_cls: target_df.loc[index0, df_col]}
+                # sqlalchemy不识别pd.nan
+                value0 = target_df.loc[index0, df_col]
+                value0 = value0 if pd.notna(value0) else None
+                
+                query0.update({table_col_cls: value0}
                               , synchronize_session=False)
             
             print('数据库更新行数：', target_df.shape[0])
@@ -342,6 +393,12 @@ class sql_manager(object):
         # 不同的数据库，需要的参数不同
         if sql_args['db_dialect'] == 'oracle':
             needed_args = ['db_dialect', 'db_driver', 'host', 'user', 'password', 'sid', 'dbname']
+            
+            # Oracle的数据类型比较特殊
+            global np_type2sql_type,sql_type2np_type,np_type2oracle_type,oracle_type2np_type
+            np_type2sql_type = np_type2oracle_type
+            sql_type2np_type = oracle_type2np_type
+            
         elif sql_args['db_dialect'] == 'mysql':
             needed_args = ['db_dialect', 'db_driver', 'host', 'user', 'password', 'dbname']
         
@@ -374,12 +431,9 @@ class sql_manager(object):
         # 编辑salalchemy中的数据库参数字符串
         global eng_str
         db_dialect = sql_args['db_dialect']
-        engine = sqlalchemy.create_engine(eng_str[db_dialect].format(**sql_args))
+        engine = sqlalchemy.create_engine(eng_str[db_dialect].format(**sql_args), echo=True)
         return engine
     
-
-
-
 
 if __name__ == '__main__':
     sql_manager = sql_manager()
@@ -391,7 +445,7 @@ if __name__ == '__main__':
         , "host": "localhost"
         , "user": "Dyson"
         , "password": "122321"
-        , 'sid': 'XE'
+        , 'sid': 'ORCL'
         , 'dbname': 'HR'
         , 'data_type': 'DataFrame'
     }
@@ -417,11 +471,15 @@ if __name__ == '__main__':
 #                       ,"job_title":{1:'WTF',2:'WTF'}})
 # =============================================================================
     #import datetime
-    df = pd.DataFrame({"FIRST_NAME":{1:'Daniel', 2:'David'}
-                      , "LAST_NAME":{1:'Faviet', 2:'Lee'}
+    df = pd.DataFrame({"JOB_ID":{1:'Daniel0', 2:'David'}
+                      , "JOB_TITLE":{1:'Faviet0', 2:'Lee'}
+                      })
                       #, "test":{1:'NEW{}'.format(random.randint(1,1000)),2:'NEW{}'.format(random.randint(1,1000))}})
-                      , "test":{1:random.randint(1,1000),2:None}})
-    sql_manager.update_df_data(sql_args, df, 'EMPLOYEES'
-                               , df_col='test', table_col='test'
-                               , df_keys=['FIRST_NAME', "LAST_NAME"], table_keys=['FIRST_NAME', "LAST_NAME"])
+#                      , "test":{1:random.randint(1,1000),2:None}})
+    print(df)
+    print(df.dtypes)
+    sql_manager.insert_df_data(sql_args, df, 'JOBS')
+#    sql_manager.update_df_data(sql_args, df, 'JOBS'
+#                               , df_col='test', table_col='test'
+#                               , df_keys=['JOB_ID', "JOB_TITLE"], table_keys=['JOB_ID', "JOB_TITLE"])
 
