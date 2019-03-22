@@ -47,7 +47,7 @@ class decision_tree(object):
         if df.shape[1] == 1:
             # 遍历所有特征以后
             return self.majority_count(class_ser)
-
+        
         if class_ser.drop_duplicates().shape[0] > df.drop([self.target_type], axis=1).drop_duplicates().shape[0]:
             print("Warning ！！！\n存在相同特征的数据对应不同的目标类型")
             print(df)
@@ -77,7 +77,10 @@ class decision_tree(object):
                 continue
 
             unique_values = df[col].drop_duplicates()
-            new_ent = unique_values.apply(lambda value:self.Shannon_ent_new(df, col, value)).sum()
+            new_ent = (unique_values
+                       .apply(lambda value:self.Shannon_ent_new(df, col, value))
+                       .sum()
+                       )
             info_gain = base_entropy - new_ent
             print("%s列的信息熵为%s" %(col, info_gain))
 
@@ -129,8 +132,14 @@ class decision_tree(object):
         return max0
 
     def plot_node(self, node_text, center_point, parent_point, node_type):
-        self.create_plot.ax1.annotate(node_text, xy=parent_point, xycoords='axes fraction',xytext=center_point,
-                                 textcoords='axes fraction', va='center', ha='center', bbox=node_type,arrow_props=self.arrow_args)
+        self.create_plot.ax1.annotate(node_text, xy=parent_point
+                                      , xycoords='axes fraction'
+                                      , xytext=center_point
+                                      , textcoords='axes fraction'
+                                      , va='center'
+                                      , ha='center'
+                                      , bbox=node_type
+                                      , arrow_props=self.arrow_args)
     def create_plot(self):
         fig = plt.figure(1, facecolor='white')
         fig.clf()
