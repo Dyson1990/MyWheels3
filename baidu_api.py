@@ -61,6 +61,8 @@ class baidu_api(object):
 
 if __name__ == '__main__':
     baidu_api = baidu_api()
+    s = baidu_api.get_data('九堡','杭州')
+    print(s)
     # ak = 'ZGz27O8UEXkC3SEIdHAn7u6aFL1CH0u0'
     # sk = '70CTq3TOe3x6XGuhW7RC7z9YVG4r5zuZ'
     
