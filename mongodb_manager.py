@@ -72,7 +72,8 @@ class mongodb_manager(object):
         
         collection = db[collection_name]
         resp = collection.insert_many(doc_list)
-        print('mongodb_manager ==>insert_doc affected rows: {}'.format(len(resp.inserted_ids)))
+        print('mongodb_manager ==> '\
+              'insert_doc affected rows: {}'.format(len(resp.inserted_ids)))
         return None
     
     def delete_doc(self, filter_dict, collection_name, engine_args, method='regex'):
@@ -87,11 +88,13 @@ class mongodb_manager(object):
         if method == 'regex':
             # 此处的filter_dict应该为类似{ "name": {"$regex": "^F"} }的正则表达式字典
             resp = collection.delete_many(filter_dict)
-            print('mongodb_manager ==> delete_doc affected rows: {}'.format(len(resp.inserted_ids)))
+            print('mongodb_manager ==> '\
+                  'delete_doc affected rows: {}'.format(len(resp.inserted_ids)))
         else:
             # 此处的filter_dict应该为类似{ "name": "Taobao" }的精确的字段名
             resp = collection.delete_one(filter_dict)
-            print('mongodb_manager ==> delete_doc affected rows: {}'.format(len(resp.inserted_ids)))
+            print('mongodb_manager ==>'\
+                  ' delete_doc affected rows: {}'.format(len(resp.inserted_ids)))
             
         return None
     
@@ -99,7 +102,8 @@ class mongodb_manager(object):
         if not isinstance(filter_dict, dict): 
             raise Exception("筛选对象filter_dict应为字典结构")
         if not isinstance(update_dict, dict) or '$set' not in update_dict: 
-            raise Exception("更新对象filter_dict应为类似{\"$set\": {\"alexa\": \"123\" } }字典结构")
+            raise Exception("更新对象filter_dict应为类似"\
+                            "{\"$set\": {\"alexa\": \"123\" } }字典结构")
         
         engine = self.__sql_engine(engine_args)
         dbname = engine_args['dbname']
@@ -109,11 +113,13 @@ class mongodb_manager(object):
         if method == 'regex':
             # 此处的filter_dict应该为类似{ "name": {"$regex": "^F"} }的正则表达式字典
             resp = collection.update_many(filter_dict, update_dict)
-            print('mongodb_manager ==> update_doc affected rows: {}'.format(len(resp.inserted_ids)))
+            print('mongodb_manager ==> '\
+                  'update_doc affected rows: {}'.format(len(resp.inserted_ids)))
         else:
             # 此处的filter_dict应该为类似{ "name": "Taobao" }的精确的字段名
             resp = collection.update_one(filter_dict, update_dict)
-            print('mongodb_manager ==> update_doc affected rows: {}'.format(len(resp.inserted_ids)))
+            print('mongodb_manager ==> '\
+                  'update_doc affected rows: {}'.format(len(resp.inserted_ids)))
             
         return None
     
