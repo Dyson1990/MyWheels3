@@ -90,3 +90,5 @@ ENV/
 
 # Python bak
 *.py.bak
+
+.spyproject/
