@@ -33,11 +33,21 @@ class dataframe_manager(object):
             return None
         
         # 将col列分割后， 生成新的列，
-        splitted_col = df[col].str.split(sep, expand=True)
-        stack_col = splitted_col.stack().reset_index(level=1, drop=True).rename(col)
+        splitted_col = (df[col]
+                        .str
+                        .split(sep, expand=True)
+                        )
+        stack_col = (splitted_col
+                     .stack()
+                     .reset_index(level=1, drop=True)
+                     .rename(col)
+                     )
         
         # 删除旧的col列，将前面生成的col列组合进去
-        df = df.drop(col, axis=1).join(stack_col) # 默认是左连接
+        df = (df
+              .drop(col, axis=1)
+              .join(stack_col)
+              )# 默认是左连接
         
         return df
     
@@ -54,9 +64,10 @@ class dataframe_manager(object):
         1 a|a
         2 b|c|d
         """
-        df = df.groupby(groupby_col).aggregate(
-                lambda ser: sep.join(ser.fillna(fill_na))
-                )
+        df = (df
+              .groupby(groupby_col)
+              .aggregate(lambda ser: sep.join(ser.fillna(fill_na)))
+              )
         df = df.reset_index()
         return df
     
