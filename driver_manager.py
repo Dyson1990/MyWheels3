@@ -63,62 +63,59 @@ user_agent_list = [
 ]
 
 
-class driver_manager(object):
-    def __init__(self):
-        self.user_agent = random.choice(user_agent_list)
-        self.headers = {'Accept': '*/*',
-                        'Accept-Language': 'en-US,en;q=0.8',
-                        'Cache-Control': 'max-age=0',
-                        'User-Agent': self.user_agent,
-                        # 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36',
-                        'Connection': 'keep-alive'
-                        }
+user_agent = random.choice(user_agent_list)
+headers = {'Accept': '*/*',
+            'Accept-Language': 'en-US,en;q=0.8',
+            'Cache-Control': 'max-age=0',
+            'User-Agent': user_agent,
+            # 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36',
+            'Connection': 'keep-alive'
+            }
 
-    def initialization(self, engine_path, time_out=180, **kwargs):
-        # 初始化一个网页浏览器，根据传入的参数选择使用哪个浏览器，目前支持chrome
-        engine = os.path.split(engine_path)[-1]
-        driver = getattr(self, engine)
-        driver = driver(engine_path, **kwargs)
-        driver.set_page_load_timeout(time_out)
-        return driver
+def initialization(engine_path, time_out=180, **kwargs):
+    # 初始化一个网页浏览器，根据传入的参数选择使用哪个浏览器，目前支持chrome
+    engine = os.path.split(engine_path)[-1]
+    driver = getattr(engine)
+    driver = driver(engine_path, **kwargs)
+    driver.set_page_load_timeout(time_out)
+    return driver
 
-    def get_header(self):
-        return self.headers
+def get_header(self):
+    return headers
 
-    def chromedriver(self, engine_path, **kwargs):
-        # 不让Chrome显示界面
-        #display = pyvirtualdisplay.Display(visible=False)
-        #display.start()
+def chromedriver(engine_path, **kwargs):
+    # 不让Chrome显示界面
+    #display = pyvirtualdisplay.Display(visible=False)
+    #display.start()
 
-        options = selenium.webdriver.ChromeOptions()
-        # options.add_experimental_option("excludeSwitches", ["ignore-certificate-errors"])
-        options.add_argument("--headless")
-        for key in self.headers:
-            s = '{}="{}"'.format(key, self.headers[key])
-            options.add_argument(s)
-        driver = selenium.webdriver.Chrome(executable_path=engine_path
-                                           # , chrome_options=options)
-                                           , options=options)
+    options = selenium.webdriver.ChromeOptions()
+    # options.add_experimental_option("excludeSwitches", ["ignore-certificate-errors"])
+    options.add_argument("--headless")
+    for key in headers:
+        s = '{}="{}"'.format(key, headers[key])
+        options.add_argument(s)
+    driver = selenium.webdriver.Chrome(executable_path=engine_path
+                                       # , chrome_options=options)
+                                       , options=options)
 
-        #display.stop()
-        driver.set_window_size(1920, 1080)
-        return driver
+    #display.stop()
+    driver.set_window_size(1920, 1080)
+    return driver
 
 
-    def get_html(self, url, engine_path):
-        # 由url得到对应的html代码
-        driver = self.initialization(engine_path)
-        driver.get('about:blank')
-        driver.get(url)
+def get_html(url, engine_path):
+    # 由url得到对应的html代码
+    driver = initialization(engine_path)
+    driver.get('about:blank')
+    driver.get(url)
 
-        html = driver.page_source
-        driver.quit()
-        return html
+    html = driver.page_source
+    driver.quit()
+    return html
 
 
 if __name__ == '__main__':
-    driver_manager = driver_manager()
-    
+
     sysstr = platform.system()
     if sysstr == 'Windows':
         engine_path = os.path.join(os.getcwd()
@@ -131,7 +128,7 @@ if __name__ == '__main__':
     else:
         raise Exception('unknown system')
         
-    driver = driver_manager.chromedriver(engine_path)
+    driver = chromedriver(engine_path)
     
     driver.get('http://lhnb.mofcom.gov.cn/publicity/info?id=1264473')
     with codecs.open('test_driver.html', 'w', 'utf-8') as f:
