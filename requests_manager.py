@@ -113,7 +113,7 @@ if __name__ == '__main__':
     ip = get_html('https://icanhazip.com'
                   , proxy_pool = r'C:\Users\gooddata\Desktop\proxy_pool.txt')
     print('ip地址为：{}'.format(ip))
-    s = get_html('http://lhnb.mofcom.gov.cn/publicity/info?id=1264473'
+    s = get_html('http://sz.mnr.gov.cn/kfq/201710/t20171011_1646877.html'
                  , proxy_pool = r'C:\Users\gooddata\Desktop\proxy_pool.txt')
     with codecs.open('test_requests.html', 'w', 'utf-8') as f:
         f.write(s)

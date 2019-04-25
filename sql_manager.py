@@ -18,6 +18,7 @@ import sqlalchemy.dialects.oracle
 import pandas as pd
 import numpy as np
 from contextlib import closing
+import json
 import random
 import codecs
 
@@ -428,50 +429,64 @@ def __sql_engine(sql_args):
     db_dialect = sql_args['db_dialect']
     engine = sqlalchemy.create_engine(eng_str[db_dialect].format(**sql_args), echo=True)
     return engine
-    
+
+
+def check_json(str0):
+    try:
+        json.loads(str0)
+    except:
+        return False
+    else:
+        return True
 
 if __name__ == '__main__':    
-    # 本地测试Oracle参数
-    sql_args = {
-        'db_dialect': 'oracle'
-        , 'db_driver': 'cx_Oracle'
-        , "host": "localhost"
-        , "user": "Dyson"
-        , "password": "122321"
-        , 'sid': 'ORCL'
-        , 'dbname': 'HR'
-        , 'data_type': 'DataFrame'
-    }
-    # print(sql_manager.connect('SELECT JOB_ID, MIN_SALARY, COMMIT FROM JOBS', sql_args))
-   
-    # 测试本地MySQL参数
 # =============================================================================
+#     # 本地测试Oracle参数
 #     sql_args = {
-#         'db_dialect': 'MySQL'
-#         , 'db_driver': 'pymysql'
+#         'db_dialect': 'oracle'
+#         , 'db_driver': 'cx_Oracle'
 #         , "host": "localhost"
 #         , "user": "Dyson"
 #         , "password": "122321"
-#         , 'dbname': 'sakila'
+#         , 'sid': 'ORCL'
+#         , 'dbname': 'HR'
 #         , 'data_type': 'DataFrame'
 #     }
+#     # print(sql_manager.connect('SELECT JOB_ID, MIN_SALARY, COMMIT FROM JOBS', sql_args))
 # =============================================================================
-    # print(sql_manager.connect('SELECT * FROM `actor` LIMIT 20', sql_args))
+   
+    # 测试本地MySQL参数
+    sql_args = {
+        'db_dialect': 'MySQL'
+        , 'db_driver': 'pymysql'
+        , "host": "192.168.50.188"
+        , "user": "Dyson"
+        , "password": "122321"
+        , 'dbname': 'test'
+        , 'data_type': 'DataFrame'
+    }
+    df = connect(sql_args, 'SELECT * FROM `new_tzxm_infos`')
     
+    df['if_json'] = df['project_info'].apply(lambda s: check_json(s))
+    
+    print(df.loc[df['if_json']==False, 'project_code'].to_list())
+
+
+
     
 # =============================================================================
 #     df = pd.DataFrame({"job_id":{1:'{}'.format(random.randint(1,1000)), 2:'{}'.format(random.randint(1,1000))}
 #                       ,"job_title":{1:'WTF',2:'WTF'}})
 # =============================================================================
     #import datetime
-    df = pd.DataFrame({"JOB_ID":{1:'Daniel0', 2:'David'}
-                      , "JOB_TITLE":{1:'Faviet0', 2:'Lee'}
-                      })
+#    df = pd.DataFrame({"JOB_ID":{1:'Daniel0', 2:'David'}
+#                      , "JOB_TITLE":{1:'Faviet0', 2:'Lee'}
+#                      })
                       #, "test":{1:'NEW{}'.format(random.randint(1,1000)),2:'NEW{}'.format(random.randint(1,1000))}})
 #                      , "test":{1:random.randint(1,1000),2:None}})
-    print(df)
-    print(df.dtypes)
-    insert_df_data(sql_args, df, 'JOBS')
+#    print(df)
+#    print(df.dtypes)
+#    insert_df_data(sql_args, df, 'JOBS')
 #    sql_manager.update_df_data(sql_args, df, 'JOBS'
 #                               , df_col='test', table_col='test'
 #                               , df_keys=['JOB_ID', "JOB_TITLE"], table_keys=['JOB_ID', "JOB_TITLE"])

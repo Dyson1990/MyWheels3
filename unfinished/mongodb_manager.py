@@ -18,7 +18,7 @@ def __standardize_args(engine_args):
     # 检查所需参数是否都存在，规范输入的一些参数
     if not isinstance(engine_args, dict):
         raise Exception("engine_args格式错误！！！")
-    needed_args = ['host', 'user', 'password', 'dbname']
+    needed_args = ['host', 'dbname']
     
     if not set(needed_args).difference(set(engine_args)):
         raise Exception("缺少数据库参数")
@@ -26,7 +26,10 @@ def __standardize_args(engine_args):
     if 'port' not in engine_args:
         engine_args['port'] = '27017'
     
-def __sql_engine(engine_args):
+def __engine(engine_args):
+    
+    __standardize_args(engine_args)
+    
     host = engine_args['host']
     port = engine_args['port']
     engine = pymongo.MongoClient("mongodb://{}:{}/".format(host, port))
@@ -35,7 +38,7 @@ def __sql_engine(engine_args):
 
 def create_collection(collection_name, engine_args):
     # 创建集合
-    engine = __sql_engine(engine_args)
+    engine = __engine(engine_args)
     dbname = engine_args['dbname']
     db = engine[dbname]
     
@@ -44,7 +47,7 @@ def create_collection(collection_name, engine_args):
 
 def drop_collection(collection_name, engine_args):
     # 创建集合
-    engine = __sql_engine(engine_args)
+    engine = __engine(engine_args)
     dbname = engine_args['dbname']
     db = engine[dbname]
     
@@ -63,7 +66,7 @@ def insert_doc(doc_list, collection_name, engine_args):
     if not isinstance(doc_list, list): 
         raise Exception("data_dict应为类似于[dict, dict......]的列表结构")
         
-    engine = __sql_engine(engine_args)
+    engine = __engine(engine_args)
     dbname = engine_args['dbname']
     db = engine[dbname]
     
@@ -77,7 +80,7 @@ def delete_doc(filter_dict, collection_name, engine_args, method='regex'):
     if not isinstance(filter_dict, dict): 
         raise Exception("筛选对象filter_dict应为字典结构")
     
-    engine = __sql_engine(engine_args)
+    engine = __engine(engine_args)
     dbname = engine_args['dbname']
     db = engine[dbname]
     
@@ -102,7 +105,7 @@ def update_doc(filter_dict, update_dict, collection_name, engine_args, method='r
         raise Exception("更新对象filter_dict应为类似"\
                         "{\"$set\": {\"alexa\": \"123\" } }字典结构")
     
-    engine = __sql_engine(engine_args)
+    engine = __engine(engine_args)
     dbname = engine_args['dbname']
     db = engine[dbname]
     
@@ -125,7 +128,7 @@ def update_doc(filter_dict, update_dict, collection_name, engine_args, method='r
 #     if not isinstance(filter_dict, dict) or filter_dict: 
 #         raise Exception("筛选对象filter_dict应为字典结构")
 #     
-#     engine = __sql_engine(engine_args)
+#     engine = __engine(engine_args)
 #     dbname = engine_args['dbname']
 #     #db = engine[dbname]
 #     # 没有写完
