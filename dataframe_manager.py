@@ -69,6 +69,9 @@ def comb_rows(df, groupby_col, sep, fill_na=''):
     1 a|a
     2 b|c|d
     """
+    if df.empty:
+        return None
+    
     df = (df
           .groupby(groupby_col)
           .aggregate(lambda ser: sep.join(ser.fillna(fill_na)))
@@ -82,6 +85,9 @@ def expand_json(df, cols, error='ignore'):
     df：DataFrame
     cols：需要转换的列，需要传入列表。
     """
+    if df.empty:
+        return None
+    
     if isinstance(cols, list):
         raise Exception('expand_json => 参数cols必须为列表')
     res = pd.DataFrame([])
