@@ -65,11 +65,11 @@ user_agent_list = [
 
 user_agent = random.choice(user_agent_list)
 headers = {'Accept': '*/*',
-            'Accept-Language': 'en-US,en;q=0.8',
-            'Cache-Control': 'max-age=0',
-            'User-Agent': user_agent,
-            # 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36',
-            'Connection': 'keep-alive'
+           'Accept-Language': 'en-US,en;q=0.8',
+           'Cache-Control': 'max-age=0',
+           'User-Agent': user_agent,
+           # 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36',
+           'Connection': 'keep-alive'
             }
 
 def initialization(engine_path, time_out=180, **kwargs):
@@ -94,6 +94,9 @@ def chromedriver(engine_path, **kwargs):
     for key in headers:
         s = '{}="{}"'.format(key, headers[key])
         options.add_argument(s)
+    if 'proxy' in kwargs:
+        options.add_argument('--proxy-server=http://%s' % kwargs['proxy'])
+        
     driver = selenium.webdriver.Chrome(executable_path=engine_path
                                        # , chrome_options=options)
                                        , options=options)
