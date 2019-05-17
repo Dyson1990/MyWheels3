@@ -77,6 +77,6 @@ def dirs_tree_filtered(startPath):
 if __name__ == '__main__':
     # dir = raw_input('please input the path:')
     # dir = r'E:\Download\新建文件夹'
-    dir0 = r'C:\Users\gooddata\Desktop\work0'
+    dir0 = r'C:\Users\gooddata\PycharmProjects\pipelining_init\pipelining'
     # list_files(dir)
     print(dirs_tree_filtered(dir0))
