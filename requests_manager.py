@@ -12,6 +12,7 @@ import os
 import random
 import requests
 import codecs
+import base64
 
 
 user_agent_list = [
@@ -104,10 +105,20 @@ def get_html(url, **kwargs):
     return html
 
 def get_file(url, targetfile):
-    r = requests.get(url, headers=headers)
+    global headers
+    req = requests.get(url, headers=headers)
     with open(targetfile, "wb") as code:
-        code.write(r.content)
+        code.write(req.content)
         print("====>>>Successfully saving %s" %targetfile)
+        
+def get_binary_image(url):
+    global headers
+    req = requests.get(url, headers=headers)
+    try:
+        binary_img = base64.b64encode(req.text)
+    except:
+        raise Exception('网站response中编码不正确，或者返回的不是图片。')
+    return binary_img
 
 if __name__ == '__main__':
     ip = get_html('https://icanhazip.com'
