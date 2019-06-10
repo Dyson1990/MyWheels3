@@ -1,0 +1,16 @@
+<uwsgi>
+    <socket>127.0.0.1:8000</socket><!-- 与nginx通讯的端口-->
+    <!--<http>:8000</http>-->
+    <chdir>/home/lyb/django_proj/qy_data_guide/</chdir>
+    <wsgi-file>qy_data_guide/wsgi.py</wsgi-file><!--wsgi.py文件所在的位置-->
+    <processes>4</processes> <!-- 进程数 -->
+    <threads>2</threads> <!-- 线程数 -->
+    <disable-logging>false</disable-logging>   <!--  true只记录uwsgi错误和内部消息，不记录常规请求信息，false反之-->
+    <daemonize>/home/lyb/django_proj/qy_data_guide/uwsgi/uwsgi.log</daemonize><!--记录请求日志的文件所在的位置-->
+    <!--<socket>/(uwsgi文件夹的上级路径)/uwsgi/uwsgi.sock</socket>--><!--与nginx工具通讯的所在位置-->
+    <pidfile>/home/lyb/django_proj/qy_data_guide/uwsgi/uwsgi.pid</pidfile><!--对uwsgi进程管理的文件所在的位置-->
+    <stats>:8080</stats><!--对uwsgi负载情况记录的文件所在的位置/home/lyb/django_proj/qy_data_guide/uwsgi/uwsgi.status-->
+    <master>true</master><!--开启主线程-->
+    <vacuum>true</vacuum><!--true当服务器退出的时候自动清理环境，删除unix socket文件和pid文件，false反之-->
+    <buffer-size>65535</buffer-size><!--uwsgi的最大缓存-->
+</uwsgi>
