@@ -102,7 +102,7 @@ def standardize(df, delimiter=r'/\n/', b0 = True):
     df = title_standardize(df, delimiter, b0)
     df = data_standardize(df, delimiter)
 
-        return df
+    return df
 
 
 

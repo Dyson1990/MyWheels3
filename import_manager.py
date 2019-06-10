@@ -9,7 +9,6 @@ import pkgutil
 
 def get_obj(dir_path, mod_name, obj_name=None):
     """
-    返回pipelining这个项目下的一个对象
     dir_path: str
     mod_name: str
     """
