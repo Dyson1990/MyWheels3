@@ -46,7 +46,7 @@ def create_collection(collection_name, engine_args):
     return None
 
 def drop_collection(collection_name, engine_args):
-    # 创建集合
+    # 删除集合
     engine = __engine(engine_args)
     dbname = engine_args['dbname']
     db = engine[dbname]
@@ -64,7 +64,7 @@ def insert_doc(doc_list, collection_name, engine_args):
         doc_list = doc_list.to_dict(orient = 'records')
         
     if not isinstance(doc_list, list): 
-        raise Exception("data_dict应为类似于[dict, dict......]的列表结构")
+        raise Exception("doc_list应为类似于[dict, dict......]的列表结构")
         
     engine = __engine(engine_args)
     dbname = engine_args['dbname']
