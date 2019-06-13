@@ -1,0 +1,344 @@
+[
+  {
+    "name": "TINYINT",
+    "type_code": 1,
+    "display_size": null,
+    "internal_size": 4,
+    "precision": 4,
+    "scale": 0,
+    "null_ok": true
+  },
+  {
+    "name": "SMALLINT",
+    "type_code": 2,
+    "display_size": null,
+    "internal_size": 6,
+    "precision": 6,
+    "scale": 0,
+    "null_ok": true
+  },
+  {
+    "name": "MEDIUMINT",
+    "type_code": 9,
+    "display_size": null,
+    "internal_size": 9,
+    "precision": 9,
+    "scale": 0,
+    "null_ok": true
+  },
+  {
+    "name": "INT",
+    "type_code": 3,
+    "display_size": null,
+    "internal_size": 11,
+    "precision": 11,
+    "scale": 0,
+    "null_ok": true
+  },
+  {
+    "name": "BIGINT",
+    "type_code": 8,
+    "display_size": null,
+    "internal_size": 20,
+    "precision": 20,
+    "scale": 0,
+    "null_ok": true
+  },
+  {
+    "name": " DECIMAL",
+    "type_code": 246,
+    "display_size": null,
+    "internal_size": 2,
+    "precision": 2,
+    "scale": 0,
+    "null_ok": true
+  },
+  {
+    "name": "FLOAT",
+    "type_code": 4,
+    "display_size": null,
+    "internal_size": 1,
+    "precision": 1,
+    "scale": 0,
+    "null_ok": true
+  },
+  {
+    "name": "REAL",
+    "type_code": 5,
+    "display_size": null,
+    "internal_size": 1,
+    "precision": 1,
+    "scale": 0,
+    "null_ok": true
+  },
+  {
+    "name": "DOUBLE",
+    "type_code": 5,
+    "display_size": null,
+    "internal_size": 1,
+    "precision": 1,
+    "scale": 0,
+    "null_ok": true
+  },
+  {
+    "name": "BIT",
+    "type_code": 16,
+    "display_size": null,
+    "internal_size": 1,
+    "precision": 1,
+    "scale": 0,
+    "null_ok": true
+  },
+  {
+    "name": "DATE",
+    "type_code": 10,
+    "display_size": null,
+    "internal_size": 10,
+    "precision": 10,
+    "scale": 0,
+    "null_ok": true
+  },
+  {
+    "name": "DATETIME",
+    "type_code": 12,
+    "display_size": null,
+    "internal_size": 19,
+    "precision": 19,
+    "scale": 0,
+    "null_ok": true
+  },
+  {
+    "name": "TIMESTAMP",
+    "type_code": 7,
+    "display_size": null,
+    "internal_size": 19,
+    "precision": 19,
+    "scale": 0,
+    "null_ok": true
+  },
+  {
+    "name": "TIME",
+    "type_code": 11,
+    "display_size": null,
+    "internal_size": 10,
+    "precision": 10,
+    "scale": 0,
+    "null_ok": true
+  },
+  {
+    "name": "YEAR",
+    "type_code": 13,
+    "display_size": null,
+    "internal_size": 4,
+    "precision": 4,
+    "scale": 0,
+    "null_ok": true
+  },
+  {
+    "name": "CHAR",
+    "type_code": 254,
+    "display_size": null,
+    "internal_size": 3,
+    "precision": 3,
+    "scale": 0,
+    "null_ok": true
+  },
+  {
+    "name": "VARCHAR",
+    "type_code": 253,
+    "display_size": null,
+    "internal_size": 0,
+    "precision": 0,
+    "scale": 0,
+    "null_ok": true
+  },
+  {
+    "name": "BINARY",
+    "type_code": 254,
+    "display_size": null,
+    "internal_size": 0,
+    "precision": 0,
+    "scale": 0,
+    "null_ok": true
+  },
+  {
+    "name": "VARBINARY",
+    "type_code": 253,
+    "display_size": null,
+    "internal_size": 0,
+    "precision": 0,
+    "scale": 0,
+    "null_ok": true
+  },
+  {
+    "name": "BLOB",
+    "type_code": 252,
+    "display_size": null,
+    "internal_size": 65535,
+    "precision": 65535,
+    "scale": 0,
+    "null_ok": true
+  },
+  {
+    "name": "TINYBLOB",
+    "type_code": 252,
+    "display_size": null,
+    "internal_size": 255,
+    "precision": 255,
+    "scale": 0,
+    "null_ok": true
+  },
+  {
+    "name": "MEDIUMBLOB",
+    "type_code": 252,
+    "display_size": null,
+    "internal_size": 16777215,
+    "precision": 16777215,
+    "scale": 0,
+    "null_ok": true
+  },
+  {
+    "name": "LONGBLOB",
+    "type_code": 252,
+    "display_size": null,
+    "internal_size": 4294967295,
+    "precision": 4294967295,
+    "scale": 0,
+    "null_ok": true
+  },
+  {
+    "name": "TEXT",
+    "type_code": 252,
+    "display_size": null,
+    "internal_size": 196605,
+    "precision": 196605,
+    "scale": 0,
+    "null_ok": true
+  },
+  {
+    "name": "TINYTEXT",
+    "type_code": 252,
+    "display_size": null,
+    "internal_size": 765,
+    "precision": 765,
+    "scale": 0,
+    "null_ok": true
+  },
+  {
+    "name": "MEDIUMTEXT",
+    "type_code": 252,
+    "display_size": null,
+    "internal_size": 50331645,
+    "precision": 50331645,
+    "scale": 0,
+    "null_ok": true
+  },
+  {
+    "name": "LONGTEXT",
+    "type_code": 252,
+    "display_size": null,
+    "internal_size": 4294967295,
+    "precision": 4294967295,
+    "scale": 0,
+    "null_ok": true
+  },
+  {
+    "name": "ENUM",
+    "type_code": 254,
+    "display_size": null,
+    "internal_size": 3,
+    "precision": 3,
+    "scale": 0,
+    "null_ok": true
+  },
+  {
+    "name": "SET",
+    "type_code": 254,
+    "display_size": null,
+    "internal_size": 3,
+    "precision": 3,
+    "scale": 0,
+    "null_ok": true
+  },
+  {
+    "name": "GEOMETRY",
+    "type_code": 255,
+    "display_size": null,
+    "internal_size": 4294967295,
+    "precision": 4294967295,
+    "scale": 0,
+    "null_ok": true
+  },
+  {
+    "name": "POINT",
+    "type_code": 255,
+    "display_size": null,
+    "internal_size": 4294967295,
+    "precision": 4294967295,
+    "scale": 0,
+    "null_ok": true
+  },
+  {
+    "name": "LINESTRING",
+    "type_code": 255,
+    "display_size": null,
+    "internal_size": 4294967295,
+    "precision": 4294967295,
+    "scale": 0,
+    "null_ok": true
+  },
+  {
+    "name": "POLYGON",
+    "type_code": 255,
+    "display_size": null,
+    "internal_size": 4294967295,
+    "precision": 4294967295,
+    "scale": 0,
+    "null_ok": true
+  },
+  {
+    "name": "MULTIPOINT",
+    "type_code": 255,
+    "display_size": null,
+    "internal_size": 4294967295,
+    "precision": 4294967295,
+    "scale": 0,
+    "null_ok": true
+  },
+  {
+    "name": "MULTILINESTRING",
+    "type_code": 255,
+    "display_size": null,
+    "internal_size": 4294967295,
+    "precision": 4294967295,
+    "scale": 0,
+    "null_ok": true
+  },
+  {
+    "name": "MULTIPOLYGON",
+    "type_code": 255,
+    "display_size": null,
+    "internal_size": 4294967295,
+    "precision": 4294967295,
+    "scale": 0,
+    "null_ok": true
+  },
+  {
+    "name": "GEOMETRYCOLLECTION",
+    "type_code": 255,
+    "display_size": null,
+    "internal_size": 4294967295,
+    "precision": 4294967295,
+    "scale": 0,
+    "null_ok": true
+  },
+  {
+    "name": "JSON",
+    "type_code": 245,
+    "display_size": null,
+    "internal_size": 4294967295,
+    "precision": 4294967295,
+    "scale": 0,
+    "null_ok": true
+  }
+]
