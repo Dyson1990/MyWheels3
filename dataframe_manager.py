@@ -79,60 +79,63 @@ def comb_rows(df, groupby_col, sep, fill_na=''):
     df = df.reset_index()
     return df
 
-def expand_json(df, cols, error='ignore'):
-    """
-    将DataFrame中的某几列的JSON格式的数据展开
-    df：DataFrame
-    cols：需要转换的列，需要传入列表。
-    """
-    if df.empty:
-        return None
-    
-    if isinstance(cols, list):
-        raise Exception('expand_json => 参数cols必须为列表')
-    res = pd.DataFrame([])
-    for i in df.index:
-        nrows = None
-        row_temp = df.loc[[i], [col0 for col0 in df.columns if col0 not in cols]]
-        for col in cols:
-            df_temp = pd.read_json(df.loc[i, col])
-            
-            # 检查JSON中的数据是否行数对应
-            if nrows is None:
-                nrows = df_temp.shape[0]
-            elif not nrows == df_temp.shape[0]:
-                if error == 'ignore':
-                    print('WARNING：DataFrame行索引{}中的JSON数据行数不等，已忽视'
-                          .format(i))
-                    break
-                else:
-                    raise Exception('ERROR：DataFrame行索引{}中的JSON数据行数不等'
-                                    .format(i))
-            
-            df_temp = df_temp.sort_index()
-            # df_temp.index = np.arange(df_temp.shape[0])
-            # 合并第一列后，row_temp
-            if row_temp.shape[0] == df_temp.shape[0]\
-               and (row_temp.index == df_temp.index).all():
-                row_temp = pd.merge(row_temp
-                                    , df_temp
-                                    , how='inner'
-                                    , left_index=True
-                                    , right_index=True
-                                    , sort=False
-                                    , suffixes=['', '_dup'])
-            else:
-                row_temp = df_temp.apply(
-                        lambda ser: pd.concat([ser
-                                               , row_temp.iloc[0,:]
-                                               ]
-                                               , sort=False)
-                            , axis=1)
-                        
-        row_temp.index = np.repeat(i, row_temp.shape[0])
-        df = df.drop([i], axis=0)
-        res = pd.concat([res, row_temp], sort=False)
-    return res
+# 不是很实用，已经在json_manager中给出了更好的解决方案
+# =============================================================================
+# def expand_json(df, cols, error='ignore'):
+#     """
+#     将DataFrame中的某几列的JSON格式的数据展开
+#     df：DataFrame
+#     cols：需要转换的列，需要传入列表。
+#     """
+#     if df.empty:
+#         return None
+#     
+#     if isinstance(cols, list):
+#         raise Exception('expand_json => 参数cols必须为列表')
+#     res = pd.DataFrame([])
+#     for i in df.index:
+#         nrows = None
+#         row_temp = df.loc[[i], [col0 for col0 in df.columns if col0 not in cols]]
+#         for col in cols:
+#             df_temp = pd.read_json(df.loc[i, col])
+#             
+#             # 检查JSON中的数据是否行数对应
+#             if nrows is None:
+#                 nrows = df_temp.shape[0]
+#             elif not nrows == df_temp.shape[0]:
+#                 if error == 'ignore':
+#                     print('WARNING：DataFrame行索引{}中的JSON数据行数不等，已忽视'
+#                           .format(i))
+#                     break
+#                 else:
+#                     raise Exception('ERROR：DataFrame行索引{}中的JSON数据行数不等'
+#                                     .format(i))
+#             
+#             df_temp = df_temp.sort_index()
+#             # df_temp.index = np.arange(df_temp.shape[0])
+#             # 合并第一列后，row_temp
+#             if row_temp.shape[0] == df_temp.shape[0]\
+#                and (row_temp.index == df_temp.index).all():
+#                 row_temp = pd.merge(row_temp
+#                                     , df_temp
+#                                     , how='inner'
+#                                     , left_index=True
+#                                     , right_index=True
+#                                     , sort=False
+#                                     , suffixes=['', '_dup'])
+#             else:
+#                 row_temp = df_temp.apply(
+#                         lambda ser: pd.concat([ser
+#                                                , row_temp.iloc[0,:]
+#                                                ]
+#                                                , sort=False)
+#                             , axis=1)
+#                         
+#         row_temp.index = np.repeat(i, row_temp.shape[0])
+#         df = df.drop([i], axis=0)
+#         res = pd.concat([res, row_temp], sort=False)
+#     return res
+# =============================================================================
     
     
     
