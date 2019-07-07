@@ -455,6 +455,22 @@ if __name__ == '__main__':
 #     # print(sql_manager.connect('SELECT JOB_ID, MIN_SALARY, COMMIT FROM JOBS', sql_args))
 # =============================================================================
    
+#    # 测试本地MySQL参数
+#    sql_args = {
+#        'db_dialect': 'MySQL'
+#        , 'db_driver': 'pymysql'
+#        , "host": "192.168.50.188"
+#        , "user": "Dyson"
+#        , "password": "122321"
+#        , 'dbname': 'test'
+#        , 'data_type': 'DataFrame'
+#    }
+#    df = connect(sql_args, 'SELECT * FROM `new_tzxm_infos`')
+    
+#    df['if_json'] = df['project_info'].apply(lambda s: check_json(s))
+#    
+#    print(df.loc[df['if_json']==False, 'project_code'].to_list())
+
     # 测试本地MySQL参数
     sql_args = {
         'db_dialect': 'MySQL'
@@ -466,12 +482,6 @@ if __name__ == '__main__':
         , 'data_type': 'DataFrame'
     }
     df = connect(sql_args, 'SELECT * FROM `new_tzxm_infos`')
-    
-    df['if_json'] = df['project_info'].apply(lambda s: check_json(s))
-    
-    print(df.loc[df['if_json']==False, 'project_code'].to_list())
-
-
 
     
 # =============================================================================

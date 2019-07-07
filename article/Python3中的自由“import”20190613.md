@@ -10,7 +10,7 @@
 
 [import]: https://www.jb51.net/article/141643.htm	"Python实现调用另一个路径下py文件中的函数方法总结_python_脚本之家"
 
-​	但是，我觉得，没有一个是满足我的要求的。我希望能从电脑中任意一个位置导入一个函数或者一个类。出于强迫症，我不想把这些函数的路径放入环境变量里，感觉不够pythonic。而且文件多起来的话，感觉比较难以维护，涉及多个文件的import的更改。
+​	但是，我觉得，没有一个是满足我的要求的。我希望能从电脑中任意一个位置导入一个函数或者一个类。出于强迫症，我不想把这些函数的路径放入sys.path里，感觉不够pythonic。而且文件多起来的话，感觉比较难以维护，涉及多个文件的import的更改。
 
 ​	以下是我的解决方案：
 
@@ -77,7 +77,7 @@ def get_importer(path_item):
 >
 >   A dictionary acting as a cache for [finder](https://docs.python.org/3.5/glossary.html#term-finder) objects. The keys are paths that have been passed to [`sys.path_hooks`](https://docs.python.org/3.5/library/sys.html#sys.path_hooks) and the values are the finders that are found. If a path is a valid file system path but no finder is found on [`sys.path_hooks`](https://docs.python.org/3.5/library/sys.html#sys.path_hooks) then `None` is stored. Originally specified in [**PEP 302**](https://www.python.org/dev/peps/pep-0302).  Changed in version 3.3: `None` is stored instead of [`imp.NullImporter`](https://docs.python.org/3.5/library/imp.html#imp.NullImporter) when no finder is found.  
 
-​	其中提及的finder以及相关的loader都是跟importlib中的FileFinder、SourceLoader对象有关，这里我觉得也没必要去深入了解。
+​	其中提及的finder以及相关的loader都是跟importlib中的FileFinder、SourceLoader对象有关，不是我这篇文章的主要内容，暂且不深入了解。
 
 ​	结合代码以及官方文档，大家可以看到，归根结底，还是要看我们所想要的py文件的路径的对象，能否用path_importer_cache获取。不能的话，get_importer函数就会在path_hooks中“搜索”（不知道我理解的对不对）。若还是找不到，则返回None。
 
@@ -156,4 +156,4 @@ Out[6]: '__annotations__, __call__, __class__, __closure__, __code__, __defaults
 
 ​	这里的obj，已经可以当成正式的module对象或function对象来用了。所引用的py文件根本不需要放在项目文件夹下即可调用，
 
-​	虽然适用范围不是很广，但是对于一些像我这样，喜欢自己造轮子的人来说，或者是要编写框架，暂时不知道要用到哪些自定义函数的人来说，应该是有一定的利用价值的。
+​	虽然适用范围不是很广，但是对于一些像我这样，偶尔喜欢自己造点轮子的人来说，或者是要编写框架，暂时不知道要用到哪些自定义函数的人来说，应该是有一定的利用价值的。

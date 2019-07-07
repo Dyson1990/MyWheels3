@@ -58,7 +58,6 @@ user_agent = random.choice(user_agent_list)
 headers = {'Accept': '*/*',
                 'Accept-Language': 'en-US,en;q=0.8',
                 'Cache-Control': 'max-age=0',
-                'User-Agent': user_agent,
                 # 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36',
                 'Connection': 'keep-alive'
                 }
@@ -100,7 +99,7 @@ def get_html(url, **kwargs):
 
     html = resp.text
     resp.close()
-		
+
     print("web_code:%s\nuser_agent:%s"%(resp.encoding, headers['User-Agent']))
     return html
 
