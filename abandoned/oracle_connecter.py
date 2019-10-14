@@ -181,15 +181,3 @@ if __name__ == '__main__':
         , 'data_type': 'DataFrame'}
     print(oracle_connecter.connect('SELECT JOB_ID, MIN_SALARY, COMMIT FROM HR.JOBS', oracle_args))
 
-
-
-
-# =============================================================================
-#     # 服务器测试
-#     oracle_args = {'user': 'VW_NOV06'
-#         , 'password': 'C372M5c590'
-#         , 'host': '172.17.32.2'
-#         , 'sid': 'orcl'
-#         , 'dbname': 'CDB_NOV'}
-#     print(oracle_connecter.connect('SELECT * FROM F_QY_JBXX WHERE ROWNUM <= 10', oracle_args))
-# =============================================================================
