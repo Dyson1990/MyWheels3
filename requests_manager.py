@@ -13,6 +13,7 @@ import random
 import requests
 import codecs
 import base64
+import datetime
 
 
 user_agent_list = [
@@ -71,6 +72,7 @@ def ping_url(url):
         return True
 
 def get_html(url, **kwargs):
+    print(datetime.datetime.now())
     # 设定headers信息
     global headers
     headers = kwargs['headers'] if 'headers' in kwargs else headers
