@@ -61,11 +61,15 @@ oracle_type2np_type = {
         , sqlalchemy.dialects.oracle.base.NUMBER: np.dtype('float64')
         }
 
-def connect(sql_args, sql, args=None):
+def run_sql(sql_args, sql, args=None):
     """
     最常用的连接MySQL的方式
     sql 可以是一条sql语句， 也可以是sql语句组成的列表
     :return: list
+    
+    若要转换为dataframe
+    data = [list(t) for t in data] # 要求传入列表，不能是元组
+    data = pd.DataFrame(data, columns=rp.keys())
     """
     data = []
     
@@ -91,17 +95,10 @@ def connect(sql_args, sql, args=None):
             else:
                 rp = conn.execute(sql)
             
+            if rp is None:
+                return None
             data = rp.fetchall()
-
-            # 修改返回数据的类型
-            if sql_args['data_type'] == 'list':
-                data = [list(t) for t in data]
-            elif sql_args['data_type'].lower() == 'dataframe':
-                data = [list(t) for t in data] # 要求传入列表，不能是
-                data = pd.DataFrame(data, columns=rp.keys())
-            else:
-                raise(Exception('输入的参数data_type有误！！！'))
-                
+            # 若要返回dataframe，使用pd.read_sql
             return data
     except:
         print("数据库交互出错：\n%s" % traceback.format_exc())
@@ -481,7 +478,7 @@ if __name__ == '__main__':
         , 'dbname': 'test'
         , 'data_type': 'DataFrame'
     }
-    df = connect(sql_args, 'SELECT * FROM `new_tzxm_infos`')
+    df = run_sql(sql_args, 'SELECT * FROM `new_tzxm_infos`')
 
     
 # =============================================================================
