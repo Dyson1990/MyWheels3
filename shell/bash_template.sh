@@ -20,3 +20,22 @@ EOF
 state_prefix="==="
 warning_prefix="***"
 error_prefix="!!!"
+
+function display_help() {
+    if [ -n "$script_usage" ]; then
+    echo -e "Usage: $script_usage"
+    fi
+    
+    if [ -n "$script_function" ]; then
+    echo -e "$script_function"
+    fi
+    
+    if [ -n "$script_doc" ] ; then
+    echo -e "\n$script_doc"
+    fi
+    
+    if [ -n "$script_examples" ]; then
+    echo -e "\nExamples"
+    echo -e "$script_examples"
+    fi
+}
