@@ -22,9 +22,9 @@ warning_prefix="***"
 error_prefix="!!!"
 
 
-
+# 新增一个用户，并将其默认终端改成bash
 function add_user() {
-    egrep "^${1}" /etc/passwd >/dev/null # 不输出任何信息到终端
+    egrep "^${1}:" /etc/passwd >/dev/null # 不输出任何信息到终端
     if [ $? -eq 0 ]; then
         echo "${1} 已存在"
         exit 1
@@ -36,18 +36,19 @@ function add_user() {
         # echo "add_passwd_cmd: ${add_passwd_cmd}"
         eval ${add_passwd_cmd}
         
-        # 修改默认终端
-        row=$(grep -n "^${1}" /etc/passwd)
+        # 修改默认终端，将sh修改成bash
+        row=$(grep -n "^${1}:" /etc/passwd)
         row="${row/%'bin/sh'/'bin/bash'}"
         rownum="${row%%:*}"
         row="${row#*:}"
         echo ${row}
         echo ${rownum}
         echo "${rownum}c ${row}"
-        sudo sed "${rownum}c ${row}" /etc/passwd
+        sudo sed -i "${rownum}c ${row}" /etc/passwd
     fi
 }
 
+# 将用户添加入sudoers中，即可以使用sudo命令
 function to_sudoer() {
     root_row=$(grep -n "^root" /etc/sudoers)
     root_rownum=${root_row%%:*}
@@ -56,14 +57,12 @@ function to_sudoer() {
 }
 
 
-# read -p "Enter username : " username
-# read -s -p "Enter password : " password
+read -p "Enter username : " username
+read -s -p "Enter password : " password
 
 
-username="test_usr212"
-password="123"
+# username="test_usr"
+# password="123"
 # sudo userdel test_usr;rm -r /home/test_usr
 add_user $username $password
-# to_sudoer $username
-
-
+to_sudoer $username
