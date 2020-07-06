@@ -41,9 +41,9 @@ function add_user() {
         row="${row/%'bin/sh'/'bin/bash'}"
         rownum="${row%%:*}"
         row="${row#*:}"
-        echo ${row}
-        echo ${rownum}
-        echo "${rownum}c ${row}"
+        # echo ${row}
+        # echo ${rownum}
+        # echo "${rownum}c ${row}"
         sudo sed -i "${rownum}c ${row}" /etc/passwd
     fi
 }
