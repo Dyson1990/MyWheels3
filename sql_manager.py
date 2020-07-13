@@ -406,7 +406,7 @@ def __standardize_args(sql_args):
     if 'port' not in sql_args and sql_args['db_dialect'] == 'mysql':
         sql_args['port'] = '3306'
     if 'charset' not in sql_args:
-        sql_args['charset'] = 'utf8'
+        sql_args['charset'] = 'UTF8MB4'
         """
         这种错误很有可能是SQL驱动不完整
         也可能是数据库的编码与申请的编码不符
