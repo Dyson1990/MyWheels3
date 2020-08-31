@@ -195,7 +195,7 @@ mysqld_args = {
     "pid-file": "/var/lib/mysql/mysqld.pid",
     "log-error": "/var/log/mysql/error.log",
     "log-bin": "/var/lib/mysql/log_bin",
-    
+    "activate_all_roles_on_login": "ON",
 }
 
 mysqld_info =  """
