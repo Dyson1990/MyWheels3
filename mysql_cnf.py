@@ -191,11 +191,12 @@ mysqld_args = {
     "innodb_lock_wait_timeout": "120",
     
     "datadir": "/disk_1t/mysql/",
-    "socket": "/var/lib/mysql/mysqld.sock",
-    "pid-file": "/var/lib/mysql/mysqld.pid",
+    "socket": "/var/run/mysqld/mysqld.sock",
+    "pid-file": "/var/run/mysqld/mysqld.pid",
     "log-error": "/var/log/mysql/error.log",
     "log-bin": "/var/lib/mysql/log_bin",
     "activate_all_roles_on_login": "ON",
+    "secure-file-priv":"",
 }
 
 mysqld_info =  """
