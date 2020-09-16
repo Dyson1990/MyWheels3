@@ -190,7 +190,7 @@ mysqld_args = {
     "innodb_log_files_in_group": "3",
     "innodb_lock_wait_timeout": "120",
     
-    "datadir": "/disk_1t/mysql/",
+    "datadir": "/var/lib/mysql",
     "socket": "/var/run/mysqld/mysqld.sock",
     "pid-file": "/var/run/mysqld/mysqld.pid",
     "log-error": "/var/log/mysql/error.log",
