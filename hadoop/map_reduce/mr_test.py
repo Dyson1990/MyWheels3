@@ -8,7 +8,8 @@ Created on Wed Oct 21 22:54:39 2020
 
 
 # # -*- coding:utf-8 -*-
-from mrjob.job import MRJob,MRStep
+from mrjob.job import MRJob
+from mrjob.step import MRStep
 from pathlib import Path
 import traceback
 
