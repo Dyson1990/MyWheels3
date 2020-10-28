@@ -1,5 +1,5 @@
-# #!/usr/bin/python
-# # -*- coding:utf-8 -*-
+#!/usr/bin/python
+# -*- coding:utf-8 -*-
 from mrjob.job import MRJob,MRStep
 
 class Top3_Mean_Friends(MRJob):
