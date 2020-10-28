@@ -23,6 +23,8 @@ class MRwordCount(MRJob):
     def mapper(self, _, line):
         pattern=re.compile(r'(\W+)')
         for word in re.split(pattern=pattern,string=line):
+            with codecs.open('mr_sample_mapper.log', 'a', 'utf-8') as fp:
+                fp.write(line)
             if word.isalpha():
                 yield (word.lower(),1)
 
@@ -35,6 +37,8 @@ class MRwordCount(MRJob):
         (c,[1])
         '''
         l=list(count)
+        with codecs.open('mr_sample_mapper.log', 'a', 'utf-8') as fp:
+            fp.write(word, count)
         yield (word,sum(l))
 
 if __name__ == '__main__':
