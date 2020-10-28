@@ -9,33 +9,52 @@ python3 mr_sample.py -r hadoop hdfs://192.168.0.116:9000//tmp/test/Alice.txt
 """
 
 
+# =============================================================================
+# from mrjob.job import MRJob
+# import re
+# 
+# 
+# class MRwordCount(MRJob):
+#     '''
+#         line:一行数据
+#         (a,1)(b,1)(c,1)
+#         (a,1)(c1)
+#         (a1)
+#        '''
+#     def mapper(self, _, line):
+#         pattern=re.compile(r'(\W+)')
+#         for word in re.split(pattern=pattern,string=line):
+#             if word.isalpha():
+#                 yield (word.lower(),1)
+# 
+# 
+#     def reducer(self, word, count):
+#         #shuff and sort 之后
+#         '''
+#         (a,[1,1,1])
+#         (b,[1])
+#         (c,[1])
+#         '''
+#         l=list(count)
+#         yield (word,sum(l))
+# 
+# if __name__ == '__main__':
+#     MRwordCount.run() #run()方法，开始执行MapReduce任务。
+# =============================================================================
+
 from mrjob.job import MRJob
-import re
+
+class  WordCount(MRJob):
+
+    def  mapper(self,key,lines):
+        line =lines.strip().split(' ')
+
+        for word in line:
+            yield  word,1
+
+    def  reduceer(self,words,occrrence):
+        yield  words,sum(occrrence)
 
 
-class MRwordCount(MRJob):
-    '''
-        line:一行数据
-        (a,1)(b,1)(c,1)
-        (a,1)(c1)
-        (a1)
-       '''
-    def mapper(self, _, line):
-        pattern=re.compile(r'(\W+)')
-        for word in re.split(pattern=pattern,string=line):
-            if word.isalpha():
-                yield (word.lower(),1)
-
-
-    def reducer(self, word, count):
-        #shuff and sort 之后
-        '''
-        (a,[1,1,1])
-        (b,[1])
-        (c,[1])
-        '''
-        l=list(count)
-        yield (word,sum(l))
-
-if __name__ == '__main__':
-    MRwordCount.run() #run()方法，开始执行MapReduce任务。
+if __name__ =="__main__":
+    WordCount.run()
