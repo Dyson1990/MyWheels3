@@ -11,7 +11,9 @@ import traceback
 import codecs
 from mrjob.job import MRJob
 import re
+from pathlib import Path
 
+file_dir = Path(__file__).parent
 
 class MRwordCount(MRJob):
     '''
@@ -23,7 +25,8 @@ class MRwordCount(MRJob):
     def mapper(self, _, line):
         pattern=re.compile(r'(\W+)')
         for word in re.split(pattern=pattern,string=line):
-            with codecs.open('mr_sample_mapper.log', 'a', 'utf-8') as fp:
+            file_path = Path(file_dir, 'mr_sample_mapper.log').as_posix()
+            with codecs.open(file_path, 'a', 'utf-8') as fp:
                 fp.write(line)
             if word.isalpha():
                 yield (word.lower(),1)
@@ -37,8 +40,8 @@ class MRwordCount(MRJob):
         (c,[1])
         '''
         l=list(count)
-        with codecs.open('mr_sample_mapper.log', 'a', 'utf-8') as fp:
-            fp.write(word, count)
+        # with codecs.open('mr_sample_mapper.log', 'a', 'utf-8') as fp:
+        #     fp.write(word, count)
         yield (word,sum(l))
 
 if __name__ == '__main__':
