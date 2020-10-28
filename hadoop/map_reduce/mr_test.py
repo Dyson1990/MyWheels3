@@ -20,10 +20,10 @@ class MRtest(MRJob):
 
     def steps(self):
         return [
-            MRStep(mapper=self.mapper1,
-                   combiner=self.combiner1,
-                   reducer=self.reducer1),
-            MRStep(reducer=self.reducer2)
+            MRStep(mapper=self.mapper0,
+                   #combiner=self.combiner1,
+                   reducer=self.reducer0),
+            #MRStep(reducer=self.reducer2)
         ]
 
     def mapper1(self, _, line):
