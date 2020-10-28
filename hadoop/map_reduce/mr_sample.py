@@ -7,8 +7,8 @@ Created on Wed Oct 21 22:54:39 2020
 
 python3 mr_sample.py -r hadoop hdfs://192.168.0.116:9000//tmp/test/Alice.txt
 """
-
-
+import traceback
+import codecs
 # =============================================================================
 # from mrjob.job import MRJob
 # import re
@@ -57,4 +57,8 @@ class  WordCount(MRJob):
 
 
 if __name__ =="__main__":
-    WordCount.run()
+    try:
+        WordCount.run()
+    except:
+        with codecs.open('mr_sample.log', 'w', 'utf-8') as fp:
+            fp.write(traceback.format_exc())
