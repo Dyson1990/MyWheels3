@@ -9,8 +9,10 @@ Created on Wed Oct 21 22:54:39 2020
 
 # # -*- coding:utf-8 -*-
 from mrjob.job import MRJob,MRStep
+from pathlib import Path
+import traceback
 
-class Top3_Mean_Friends(MRJob):
+class MRtest(MRJob):
     
     def mapper0(self, _,line):
         yield (None, line)
@@ -31,7 +33,7 @@ class Top3_Mean_Friends(MRJob):
                 yield (word.lower(),1)
 
 
-    def reducer1(self,age,friends):
+    def reducer1(self, word, count):
         #shuff and sort 之后
         '''
         (a,[1,1,1])
@@ -55,4 +57,8 @@ class Top3_Mean_Friends(MRJob):
         ]
 
 if __name__ == '__main__':
-    Top3_Mean_Friends.run()
+    try:
+        MRtest.run()
+    except:
+        Path(Path(__file__).parent, 'mr_test.log')\
+            .write_text(traceback.format_exc())
