@@ -20,7 +20,7 @@ class MRtest(MRJob):
     def reducer0(self, _,line):
         yield (None, '\n'.join(line))
     
-    def mapper1(self, _,line):
+    def mapper1(self, _, line):
         '''
         line:一行数据
         (a,1)(b,1)(c,1)
