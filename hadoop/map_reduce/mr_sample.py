@@ -25,9 +25,10 @@ class MRwordCount(MRJob):
     def mapper(self, _, line):
         pattern=re.compile(r'(\W+)')
         for word in re.split(pattern=pattern,string=line):
-            file_path = Path(file_dir, 'mr_sample_mapper.log').as_posix()
-            with codecs.open(file_path, 'a', 'utf-8') as fp:
-                fp.write(line)
+            file_path = Path(file_dir, 'mr_sample_mapper.log')
+            file_path.write_text(line, encoding='utf-8')
+            # with codecs.open(file_path, 'a', 'utf-8') as fp:
+            #     fp.write(line)
             if word.isalpha():
                 yield (word.lower(),1)
 
