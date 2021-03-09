@@ -4,12 +4,6 @@ from mrjob.job import MRJob,MRStep
 
 class Top3_Mean_Friends(MRJob):
     
-    def mapper0(self, _,line):
-        yield (None, line)
-    
-    def reducer0(self, _,line):
-        yield (None, '\n'.join(line))
-    
     def mapper1(self, _,line):
         row=line.split(',')
         if row[2].isdigit() and row[3].isdigit():

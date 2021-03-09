@@ -1,0 +1,14 @@
+2020-11-22 22:51:56  -  start upload:C:\Users\Administrator.SC-202001091919\Alice.txt
+2020-11-22 22:51:56  -  start scan , blockid=1
+2020-11-22 22:51:57  -  ErrorCode=Local Error, ErrorMessage=Block ID:0 Failed.
+	at com.aliyun.odps.ship.upload.DshipUpload.uploadBlock(DshipUpload.java:243)
+	at com.aliyun.odps.ship.upload.DshipUpload.upload(DshipUpload.java:179)
+	at com.aliyun.odps.ship.DShip.runSubCommand(DShip.java:71)
+	at com.aliyun.odps.ship.DShipCommand.run(DShipCommand.java:99)
+	at com.aliyun.openservices.odps.console.commands.AbstractCommand.execute(AbstractCommand.java:116)
+	at com.aliyun.openservices.odps.console.commands.InteractiveCommand.run(InteractiveCommand.java:108)
+	at com.aliyun.openservices.odps.console.commands.AbstractCommand.execute(AbstractCommand.java:116)
+	at com.aliyun.openservices.odps.console.commands.CompositeCommand.run(CompositeCommand.java:48)
+	at com.aliyun.openservices.odps.console.commands.AbstractCommand.execute(AbstractCommand.java:116)
+	at com.aliyun.openservices.odps.console.ODPSConsole.main(ODPSConsole.java:63)
+
