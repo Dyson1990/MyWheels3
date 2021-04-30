@@ -181,18 +181,18 @@ if __name__ == '__main__':
 #    with codecs.open(r'C:\Users\gooddata\Desktop\json样本数据.csv', 'r', 'utf-8') as f:
 #        df = pd.read_csv(f)
     engine_args = {'host': 'localhost'
-                   , 'dbname': 'test_db'
+                   , 'dbname': 'hvit'
                    , 'port': '27017'
                    }
 #    insert_doc(df, 'json_collection', engine_args)
 #    create_collection('json_collection', engine_args)
 #    insert_doc(df, 'json_collection', engine_args, load_json='auto')
 
-    json_data = select_doc({}, 'data_2017', engine_args)
-    df = pd.DataFrame(json_data, dtype=np.object)
-    df['_id'] = df['_id'].astype(np.str)
+    json_data = select_doc({}, 'mapbar', engine_args)
+#    df = pd.DataFrame(json_data, dtype=np.object)
+#    df['_id'] = df['_id'].astype(np.str)
 #    res = df.to_dict(orient = 'records')
-    print(df)
+    print(json_data)
     
 #    with codecs.open(r'C:\Users\gooddata\Desktop\tzxm_infos.json', 'w', 'utf-8') as f:
 #        json.dump(res, f, ensure_ascii=False, indent=2)
