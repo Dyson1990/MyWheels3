@@ -424,7 +424,10 @@ def __sql_engine(sql_args):
     # 编辑salalchemy中的数据库参数字符串
     global eng_str
     db_dialect = sql_args['db_dialect']
-    engine = sqlalchemy.create_engine(eng_str[db_dialect].format(**sql_args), echo=True)
+    engine = sqlalchemy.create_engine(eng_str[db_dialect].format(**sql_args)
+                                      , echo=True
+                                      , server_side_cursors=True
+                                      )
     return engine
 
 
