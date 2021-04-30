@@ -1,0 +1,6 @@
+2020-11-22 23:06:44  -  start upload:C:\Users\Administrator.SC-202001091919\专利样例数据20200728.csv
+2020-11-22 23:06:44  -  start scan , blockid=1
+2020-11-22 23:06:44  -  scan complete, blockid=1
+2020-11-22 23:06:44  -  start upload , blockid=1
+2020-11-22 23:06:44  -  upload complete, blockid=1
+2020-11-22 23:06:45  -  upload complete:C:\Users\Administrator.SC-202001091919\专利样例数据20200728.csv

@@ -1,0 +1,84 @@
+2020-11-22 22:43:36  -  java.lang.Exception: ERROR: Unknown error - ODPS-0130131:Table not found - 'dyson_test.alice_text' table not found
+	at com.aliyun.odps.ship.DShip.runSubCommand(DShip.java:115)
+	at com.aliyun.odps.ship.DShipCommand.run(DShipCommand.java:99)
+	at com.aliyun.openservices.odps.console.commands.AbstractCommand.execute(AbstractCommand.java:116)
+	at com.aliyun.openservices.odps.console.commands.InteractiveCommand.run(InteractiveCommand.java:108)
+	at com.aliyun.openservices.odps.console.commands.AbstractCommand.execute(AbstractCommand.java:116)
+	at com.aliyun.openservices.odps.console.commands.CompositeCommand.run(CompositeCommand.java:48)
+	at com.aliyun.openservices.odps.console.commands.AbstractCommand.execute(AbstractCommand.java:116)
+	at com.aliyun.openservices.odps.console.ODPSConsole.main(ODPSConsole.java:63)
+Caused by: com.aliyun.odps.ReloadException: ODPS-0130131:Table not found - 'dyson_test.alice_text' table not found
+	at com.aliyun.odps.LazyLoad.lazyLoad(LazyLoad.java:65)
+	at com.aliyun.odps.Table.isVirtualView(Table.java:476)
+	at com.aliyun.odps.ship.common.OptionsBuilder.processArgs(OptionsBuilder.java:591)
+	at com.aliyun.odps.ship.common.OptionsBuilder.buildUploadOption(OptionsBuilder.java:69)
+	at com.aliyun.odps.ship.DShip.runSubCommand(DShip.java:68)
+	... 7 more
+Caused by: [404] com.aliyun.odps.NoSuchObjectException: ODPS-0130131:Table not found - 'dyson_test.alice_text' table not found
+	at com.aliyun.odps.rest.RestClient.handleErrorResponse(RestClient.java:387)
+	at com.aliyun.odps.rest.RestClient.request(RestClient.java:328)
+	at com.aliyun.odps.rest.RestClient.request(RestClient.java:282)
+	at com.aliyun.odps.rest.RestClient.request(RestClient.java:236)
+	at com.aliyun.odps.rest.RestClient.request(RestClient.java:177)
+	at com.aliyun.odps.Table.reload(Table.java:257)
+	at com.aliyun.odps.LazyLoad.lazyLoad(LazyLoad.java:63)
+	... 11 more
+Caused by: com.aliyun.odps.rest.RestException: RequestId=5FBA79189AF8A6D891579A6A,Code=NoSuchObject,Message=ODPS-0130131:Table not found - 'dyson_test.alice_text' table not found
+	... 18 more
+
+2020-11-22 22:48:51  -  java.lang.Exception: ERROR: Unknown error - ODPS-0130131:Table not found - 'dyson_test.alice_text' table not found
+	at com.aliyun.odps.ship.DShip.runSubCommand(DShip.java:115)
+	at com.aliyun.odps.ship.DShipCommand.run(DShipCommand.java:99)
+	at com.aliyun.openservices.odps.console.commands.AbstractCommand.execute(AbstractCommand.java:116)
+	at com.aliyun.openservices.odps.console.commands.InteractiveCommand.run(InteractiveCommand.java:108)
+	at com.aliyun.openservices.odps.console.commands.AbstractCommand.execute(AbstractCommand.java:116)
+	at com.aliyun.openservices.odps.console.commands.CompositeCommand.run(CompositeCommand.java:48)
+	at com.aliyun.openservices.odps.console.commands.AbstractCommand.execute(AbstractCommand.java:116)
+	at com.aliyun.openservices.odps.console.ODPSConsole.main(ODPSConsole.java:63)
+Caused by: com.aliyun.odps.ReloadException: ODPS-0130131:Table not found - 'dyson_test.alice_text' table not found
+	at com.aliyun.odps.LazyLoad.lazyLoad(LazyLoad.java:65)
+	at com.aliyun.odps.Table.isVirtualView(Table.java:476)
+	at com.aliyun.odps.ship.common.OptionsBuilder.processArgs(OptionsBuilder.java:591)
+	at com.aliyun.odps.ship.common.OptionsBuilder.buildUploadOption(OptionsBuilder.java:69)
+	at com.aliyun.odps.ship.DShip.runSubCommand(DShip.java:68)
+	... 7 more
+Caused by: [404] com.aliyun.odps.NoSuchObjectException: ODPS-0130131:Table not found - 'dyson_test.alice_text' table not found
+	at com.aliyun.odps.rest.RestClient.handleErrorResponse(RestClient.java:387)
+	at com.aliyun.odps.rest.RestClient.request(RestClient.java:328)
+	at com.aliyun.odps.rest.RestClient.request(RestClient.java:282)
+	at com.aliyun.odps.rest.RestClient.request(RestClient.java:236)
+	at com.aliyun.odps.rest.RestClient.request(RestClient.java:177)
+	at com.aliyun.odps.Table.reload(Table.java:257)
+	at com.aliyun.odps.LazyLoad.lazyLoad(LazyLoad.java:63)
+	... 11 more
+Caused by: com.aliyun.odps.rest.RestException: RequestId=5FBA7A53F6A518B5F457DBFA,Code=NoSuchObject,Message=ODPS-0130131:Table not found - 'dyson_test.alice_text' table not found
+	... 18 more
+
+2020-11-22 22:59:26  -  java.lang.Exception: ERROR: Unknown error - ODPS-0130131:Table not found - 'dyson_test.zhuanli_text' table not found
+	at com.aliyun.odps.ship.DShip.runSubCommand(DShip.java:115)
+	at com.aliyun.odps.ship.DShipCommand.run(DShipCommand.java:99)
+	at com.aliyun.openservices.odps.console.commands.AbstractCommand.execute(AbstractCommand.java:116)
+	at com.aliyun.openservices.odps.console.commands.InteractiveCommand.run(InteractiveCommand.java:108)
+	at com.aliyun.openservices.odps.console.commands.AbstractCommand.execute(AbstractCommand.java:116)
+	at com.aliyun.openservices.odps.console.commands.CompositeCommand.run(CompositeCommand.java:48)
+	at com.aliyun.openservices.odps.console.commands.AbstractCommand.execute(AbstractCommand.java:116)
+	at com.aliyun.openservices.odps.console.ODPSConsole.main(ODPSConsole.java:63)
+Caused by: com.aliyun.odps.ReloadException: ODPS-0130131:Table not found - 'dyson_test.zhuanli_text' table not found
+	at com.aliyun.odps.LazyLoad.lazyLoad(LazyLoad.java:65)
+	at com.aliyun.odps.Table.isVirtualView(Table.java:476)
+	at com.aliyun.odps.ship.common.OptionsBuilder.processArgs(OptionsBuilder.java:591)
+	at com.aliyun.odps.ship.common.OptionsBuilder.buildUploadOption(OptionsBuilder.java:69)
+	at com.aliyun.odps.ship.DShip.runSubCommand(DShip.java:68)
+	... 7 more
+Caused by: [404] com.aliyun.odps.NoSuchObjectException: ODPS-0130131:Table not found - 'dyson_test.zhuanli_text' table not found
+	at com.aliyun.odps.rest.RestClient.handleErrorResponse(RestClient.java:387)
+	at com.aliyun.odps.rest.RestClient.request(RestClient.java:328)
+	at com.aliyun.odps.rest.RestClient.request(RestClient.java:282)
+	at com.aliyun.odps.rest.RestClient.request(RestClient.java:236)
+	at com.aliyun.odps.rest.RestClient.request(RestClient.java:177)
+	at com.aliyun.odps.Table.reload(Table.java:257)
+	at com.aliyun.odps.LazyLoad.lazyLoad(LazyLoad.java:63)
+	... 11 more
+Caused by: com.aliyun.odps.rest.RestException: RequestId=5FBA7CCE13B92F9C6858181F,Code=NoSuchObject,Message=ODPS-0130131:Table not found - 'dyson_test.zhuanli_text' table not found
+	... 18 more
+

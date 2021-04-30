@@ -13,8 +13,6 @@ https://blog.csdn.net/weixin_38070561/article/details/81289601
 
 import pyhdfs
 import os
-import pandas as pd
-import pprint
 from pathlib import Path
 
 def create_client(ip='192.168.0.116', port='9870'):
