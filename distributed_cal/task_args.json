@@ -1,7 +1,0 @@
-{
-    "task_q_size": 10,
-    "res_q_size": 10,
-    "master_ip": "127.0.0.1",
-    "master_port": 10000,
-    "authkey": "WTF"
-}
