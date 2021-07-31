@@ -1,0 +1,3 @@
+关于Sqlalchemy的automap_base不能自动映射所有表的问题
+
+说明：目前只在MySQL下进行过测试

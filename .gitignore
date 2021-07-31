@@ -93,3 +93,4 @@ ENV/
 
 .spyproject/
 .spyproject/*
+.komodoproject
