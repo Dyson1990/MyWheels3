@@ -22,12 +22,23 @@ class SSHConnection:
         # 允许连接不在know_hosts文件中的主机
         self.conn.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         # 建立连接
+
+        
+    def __enter__(self):
         self.conn.connect(self.host, username=self.username, port=self.port, password=self.passwd)
         # conn.connect("192.168.1.24", username="root", port=22, password="*ycy123*")
+        return self
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.conn.close()
         
     def __del__(self):
         # 关闭连接
-        self.conn.close()
+        try:
+            # 防止程序出错时，不断开连接？
+            self.conn.close()
+        except:
+            pass
         
     def run_cmd(self, cmd, encoding="utf-8", file_output=None):
         stdin, stdout, stderr = self.conn.exec_command(f"bash -l -c '{cmd}'")

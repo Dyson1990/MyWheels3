@@ -10,10 +10,6 @@ Created on Mon May 31 10:14:50 2021
 import sqlalchemy
 import sqlalchemy.ext.automap
 import sqlalchemy.orm
-import sqlalchemy.orm.decl_api as decl_api
-
-from sqlalchemy.sql.sqltypes import VARCHAR
-from sqlalchemy import Column, String
 
 import base64
 
