@@ -69,17 +69,6 @@ if __name__ == '__main__':
                  , 'port': '3306'
                  # , 'method': None
      }
-    # sql_args = {'db_dialect': 'mysql'
-    #              , 'db_driver': 'pymysql'
-    #              , 'host': '112.124.50.195'
-    #              , 'user': 'root'
-    #              , 'password': 'hvit123!'
-    #              , 'dbname': 'test_lyb'
-    #              , 'data_type': 'DataFrame'
-    #              , 'charset': 'utf8'
-    #              , 'port': '3306'
-    #              , 'method': None
-    #  }
     
     db_dialect = sql_args['db_dialect']
     data_engine = sqlalchemy.create_engine(eng_str[db_dialect].format(**sql_args)
