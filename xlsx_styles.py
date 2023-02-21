@@ -15,9 +15,10 @@ import copy
 
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
+from matplotlib.patches import Rectangle
 
 from loguru import logger
-from matplotlib.patches import Rectangle
+
 
 pop_gen = lambda gen, i0: list(itertools.islice(gen, i0+1))[-1]
 
