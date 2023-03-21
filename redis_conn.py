@@ -16,7 +16,9 @@ def status():
     return type_dict
     
 if __name__ == '__main__':
-    import pprint
+    # import pprint
+    # pool = redis.ConnectionPool(host='192.168.1.23', port=6379, decode_responses=True, db=0)
+    # redis_cli = redis.Redis(connection_pool=pool)
     
     for db_num in range(16):
         pool = redis.ConnectionPool(host='192.168.1.23', port=6379, decode_responses=True, db=db_num)
