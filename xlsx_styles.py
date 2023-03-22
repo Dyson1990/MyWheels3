@@ -12,6 +12,7 @@ import openpyxl
 import math
 import itertools
 import copy
+import contextlib
 
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
@@ -110,7 +111,8 @@ class ExcelStyle:
         if not self.fp.exists() or self.fp.is_dir():
             raise Exception(f"{str(fp)}文件不存在或不是文件")
         
-    def __enter__(self):
+    @contextlib.contextmanager
+    def open(self):
         """
         使用with的时候调用
         with ExcelStyle(Path, "format_stat") as obj:
@@ -119,17 +121,42 @@ class ExcelStyle:
             # obj.map_col(1, obj.cell_solid_fill, args=["orange"])
             obj.col_auto_width()
         """
+        
+        logger.info("Opening xlsx file.")
         self.wb = openpyxl.load_workbook(self.fp)
         if self.sheet_name not in self.wb.sheetnames:
             raise Exception(f"Sheet{self.sheetnames}不存在")
         
         self.ws = self.wb[self.sheet_name]
-        return self
+        return self # 类似于使用__enter__
         
-    def __exit__(self, exc_type, exc_val, exc_tb):
         self.wb.save(self.fp)
         logger.info(f"Successfully saved: {self.fp}")
         self.wb.close()
+        return None # 类似于使用__exit__
+    
+# =============================================================================
+#     def __enter__(self):
+#         """
+#         使用with的时候调用
+#         with ExcelStyle(Path, "format_stat") as obj:
+#             # obj.cell_solid_fill(2, "B", "orange")
+#             # obj.cell_solid_fill((3,2), "orange")
+#             # obj.map_col(1, obj.cell_solid_fill, args=["orange"])
+#             obj.col_auto_width()
+#         """
+#         self.wb = openpyxl.load_workbook(self.fp)
+#         if self.sheet_name not in self.wb.sheetnames:
+#             raise Exception(f"Sheet{self.sheetnames}不存在")
+#         
+#         self.ws = self.wb[self.sheet_name]
+#         return self
+#         
+#     def __exit__(self, exc_type, exc_val, exc_tb):
+#         self.wb.save(self.fp)
+#         logger.info(f"Successfully saved: {self.fp}")
+#         self.wb.close()
+# =============================================================================
         
     def get_cell_obj(self, *args):
         """
@@ -231,7 +258,8 @@ if __name__ == "__main__":
     # plot_colortable(mcolors.CSS4_COLORS)
     # plt.show()
     # print(mcolors.CSS4_COLORS)
-    with ExcelStyle(Path(r"C:\Users\Weave\Desktop\易查云\资源库\ktr文件管理\tmp\source_report20230207.xlsx"), "format_stat") as obj:
+    f_obj = ExcelStyle(Path(r"C:\Users\Weave\Desktop\易查云\资源库\ktr文件管理\tmp\source_report20230207.xlsx"), "format_stat")
+    with f_obj.open() as obj:
         # obj.cell_solid_fill(2, "B", "orange")
         # obj.cell_solid_fill((3,2), "orange")
         # obj.map_col(1, obj.cell_solid_fill, args=["orange"])
