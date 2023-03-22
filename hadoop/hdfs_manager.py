@@ -23,15 +23,6 @@ class HDFSConn():
     def __init__(self, host='192.168.1.190', port='9870'):
         self.cli = pyhdfs.HdfsClient(hosts=f"{host}:{port}", user_name="wolf")
 
-    @contextlib.contextmanager
-    def connection(self):
-        logger.info("Opening HDFS connection.")
-        
-        yield self # 类似于使用__enter__
-        
-        logger.info("Closing HDFS connection.")
-        return None # 类似于使用__exit__
-
 if __name__ == '__main__':
     with HDFSConn().connection() as conn:
         print(dir(conn.cli))
