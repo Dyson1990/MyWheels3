@@ -1,6 +1,7 @@
 # MyWheels3
 我的一些代码中需要用到的类
-- Waring 2019-04-06:为了规范自己的代码习惯，我把所有不需要定义的类全删了。可能存在一些没删干净的地方，出现报错，今后看见了再一一修正
+- **2019-04-06**:为了规范自己的代码习惯，我把所有不需要定义的类全删了。可能存在一些没删干净的地方，出现报错，今后看见了再一一修正
+- **2023-03-22**:写了个收集py文件信息的脚本，填在README.md中。
 # CATALOG
 ## _catalog
 - **gen_readme.py**:生成readme.md的脚本
@@ -70,8 +71,8 @@
 ## examples
 - **从上一级文件夹import类.py**:
 ## hadoop
-- **conn_hdfs.py**:
 - **hbase_manager.py**:
+- **hdfs_manager.py**:
 - **update_config.py**:
 #### map_reduce
 - **mr_test.py**:

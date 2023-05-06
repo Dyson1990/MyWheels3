@@ -64,7 +64,7 @@ def gen_md():
     
     lines.extend(["# MyWheels3", "我的一些代码中需要用到的类"])
     for l0 in content["journal"]:
-        lines.append(f"- {l0[0]}:{l0[1]}")
+        lines.append(f"- **{l0[0]}**: {l0[1]}")
     
     lines.extend(["# CATALOG"])
     catalog_dict = {}
@@ -101,7 +101,7 @@ def gen_md():
                 lines.append("#### "+k2)
             
             for k3, v3 in d2.items():
-                lines.append(f"- **{k3}**:{v3}")
+                lines.append(f"- **{k3}**: {v3}")
         # break
         
         

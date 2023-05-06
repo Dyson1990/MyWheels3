@@ -1,8 +1,12 @@
 {
   "journal": [
     [
-      "Waring 2019-04-06",
+      "2019-04-06",
       "为了规范自己的代码习惯，我把所有不需要定义的类全删了。可能存在一些没删干净的地方，出现报错，今后看见了再一一修正"
+    ],
+    [
+      "2023-03-22",
+      "写了个收集py文件信息的脚本，填在README.md中。"
     ]
   ],
   "catalog": {
@@ -48,8 +52,8 @@
     "examples/从上一级文件夹import类.py": "",
     "google_api.py": "",
     "graph_cal.py": "",
-    "hadoop/conn_hdfs.py": "",
     "hadoop/hbase_manager.py": "",
+    "hadoop/hdfs_manager.py": "",
     "hadoop/map_reduce/mr_test.py": "",
     "hadoop/map_reduce/mr_top3.py": "",
     "hadoop/map_reduce/mr_wordcount.py": "",
@@ -119,6 +123,8 @@
     "2023/03/22 10:53【create】 abandoned/format_dealer.py",
     "2023/03/22 10:53【create】 abandoned/github_host.py",
     "2023/03/22 10:53【create】 unfinished/sqlalchemy_table.py",
-    "2023/03/22 10:53【create】 abandoned/dir_monitor.py"
+    "2023/03/22 10:53【create】 abandoned/dir_monitor.py",
+    "2023/03/22 14:59【remove】 hadoop/conn_hdfs.py:",
+    "2023/03/22 14:59【create】 hadoop/hdfs_manager.py"
   ]
 }
