@@ -19,20 +19,15 @@ import pandas as pd
 import numpy as np
 from contextlib import closing
 import json
-import random
-import codecs
 
+# =============================================================================
+# eng_str = {
+#         'oracle':"{db_dialect}+{db_driver}://{user}:{password}@{host}:{port}/{sid}?charset={charset}"
+#         , 'mysql': "{db_dialect}+{db_driver}://{user}:{password}@{host}:{port}/{dbname}?charset={charset}"
+#         , 'postgresql': "{db_dialect}+{db_driver}://{user}:{password}@{host}:{port}/{dbname}"
+#         }
+# =============================================================================
 
-# log_obj = set_log.Logger('mysql_manager.log', set_log.logging.WARNING,
-#                          set_log.logging.DEBUG)
-# log_obj.cleanup('mysql_manager.log', if_cleanup=True)  # 是否需要在每次运行程序前清空Log文件
-
-
-eng_str = {
-        'oracle':"{db_dialect}+{db_driver}://{user}:{password}@{host}:{port}/{sid}?charset={charset}"
-        , 'mysql': "{db_dialect}+{db_driver}://{user}:{password}@{host}:{port}/{dbname}?charset={charset}"
-        , 'postgresql': "{db_dialect}+{db_driver}://{user}:{password}@{host}:{port}/{dbname}"
-        }
 # 选择数据库
 dbname_str = {
         'oracle':"ALTER SESSION SET CURRENT_SCHEMA = \"{}\""
@@ -86,16 +81,20 @@ def run_sql(sql_args, sql, args=None):
             global dbname_str
             db_dialect = sql_args['db_dialect']
             if db_dialect in dbname_str:
-                conn.execute(dbname_str[db_dialect].format(sql_args['dbname']))
+                sql0 = sqlalchemy.text(dbname_str[db_dialect].format(sql_args['database']))
+                conn.execute(sql0)
 
             # 多条SQL语句的话，循环执行
             # rp short for ResultProxy
             if isinstance(sql,list):
                 for sql0 in sql:
+                    sql0 = sqlalchemy.text(sql0)
                     rp = conn.execute(sql0)
             elif args:
+                sql = sqlalchemy.text(sql)
                 rp = conn.execute(sql,args)
             else:
+                sql = sqlalchemy.text(sql)
                 rp = conn.execute(sql)
 
             if rp is None:
@@ -381,64 +380,100 @@ def __standardize_args(sql_args):
 
     if not isinstance(sql_args, dict):
         raise Exception("sql_args格式错误！！！")
-
+    
     # 规范输入的大小写
     sql_args['db_dialect'] = sql_args['db_dialect'].lower()
-    sql_args['db_driver'] = sql_args['db_driver'].lower()
+    db_dialect = sql_args['db_dialect']
+    
+    # 兼容新旧版本
+    if 'user' in sql_args and 'username' not in sql_args:
+        sql_args['username'] = sql_args.pop('user')
+    if 'dbname' in sql_args and 'database' not in sql_args:
+        sql_args['database'] = sql_args.pop('dbname')
 
     # 不同的数据库，需要的参数不同
-    if sql_args['db_dialect'] == 'oracle':
-        needed_args = ['db_dialect', 'db_driver', 'host', 'user', 'password', 'sid', 'dbname']
+    if db_dialect == 'oracle':
+        needed_args = ['db_dialect', 'host', 'username', 'password', 'sid', 'dbname']
 
         # Oracle的数据类型比较特殊
         global np_type2sql_type,sql_type2np_type,np_type2oracle_type,oracle_type2np_type
         np_type2sql_type = np_type2oracle_type
         sql_type2np_type = oracle_type2np_type
+    elif db_dialect == 'mysql':
+        needed_args = ['db_dialect', 'host', 'username', 'password', 'database']
+    elif db_dialect == 'postgresql':
+        needed_args = ['db_dialect', 'host', 'username', 'password', 'database']
+    elif db_dialect == 'access':
+        needed_args = ['db_dialect', 'file_path']
 
-    elif sql_args['db_dialect'] == 'mysql':
-        needed_args = ['db_dialect', 'db_driver', 'host', 'user', 'password', 'dbname']
-
-    elif sql_args['db_dialect'] == 'postgresql':
-        needed_args = ['db_dialect', 'db_driver', 'host', 'user', 'password', 'dbname']
-
-    # 缺少参数则报错
+    # 缺少参数则报错，
     check_args = [s for s in needed_args if s not in sql_args]
     if check_args:
         raise Exception("缺少数据库参数：%s" % '，'.join(check_args))
 
     # 规定默认的参数的值 ##################################################
-    if 'port' not in sql_args and sql_args['db_dialect'] == 'oracle':
-        sql_args['port'] = '1521'
-    if 'port' not in sql_args and sql_args['db_dialect'] == 'mysql':
-        sql_args['port'] = '3306'
-    if 'port' not in sql_args and sql_args['db_dialect'] == 'postgresql':
-        sql_args['port'] = '5432'
-    if 'charset' not in sql_args and sql_args['db_dialect'] == 'mysql':
-        sql_args['charset'] = 'UTF8MB4'
+    sql_args['method'] = sql_args.get('method', None) # 没有参数传入，则使用fetchall
+    sql_args['data_type'] = sql_args.get('data_type', 'list')
+    if db_dialect == 'oracle':
+        sql_args['db_driver'] = sql_args.get('db_driver', 'cx_oracle').lower()
+        sql_args['port'] = sql_args.get('port', '1521')
+        
+    elif db_dialect == 'mysql':
+        sql_args['db_driver'] = sql_args.get('db_driver', 'pymysql').lower()
+        sql_args['port'] = sql_args.get('port', '3306')
+        sql_args['charset'] = sql_args.get('charset', 'UTF8MB4')
         """
         这种错误很有可能是SQL驱动不完整
         也可能是数据库的编码与申请的编码不符
         1366, "Incorrect string value: '\\xD6\\xD0\\xB9\\xFA\\xB1\\xEA...' for column 'VARIABLE_VALUE' at row 484")
         """
-    if 'method' not in sql_args:
-        # 没有参数传入，则使用fetchall
-        sql_args['method'] = None
-    if 'data_type' not in sql_args:
-        sql_args['data_type'] = 'list'
+        
+    elif db_dialect == 'postgresql':
+        sql_args['db_driver'] = sql_args.get('db_driver', 'psycopg2').lower()
+        sql_args['port'] = sql_args.get('port', '5432')
+
+    elif db_dialect == 'access':
+        sql_args['db_driver'] = sql_args.get('db_driver', 'pyodbc').lower()
+
+        connection_string = (
+            r"DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};"
+            f"DBQ={sql_args.pop('file_path')};"
+            r"ExtendedAnsiSQL=1;"
+            )
+        sql_args['query']={"odbc_connect": connection_string}
+        
     #######################################################################
     return sql_args
 
-def __sql_engine(sql_args):
-    # 编辑salalchemy中的数据库参数字符串
-    global eng_str
-    db_dialect = sql_args['db_dialect']
-    engine = sqlalchemy.create_engine(eng_str[db_dialect].format(**sql_args)
-                                      , echo=True
-                                      , server_side_cursors=True
-                                      )
-    # engine.execution_options.stream_results = True
-    return engine
+# =============================================================================
+# def __sql_engine(sql_args):
+#     # 编辑salalchemy中的数据库参数字符串
+#     global eng_str
+#     db_dialect = sql_args['db_dialect']
+# 
+#     # server_side_cursors_arg = db_dialect not in ("access")
+#     engine = sqlalchemy.create_engine(eng_str[db_dialect].format(**sql_args)
+#                                       # , echo=True
+#                                       , server_side_cursors=True
+#                                       )
+#     return engine
+# =============================================================================
 
+def __sql_engine(sql_args):
+    sql_args = sql_args.copy()
+    db_dialect = sql_args.pop('db_dialect')
+    db_driver = sql_args.pop('db_driver')
+    arg_list = ("username", "password","host","port","database","query") #URL.create()不接受其他参数 
+    sql_args = {k0: v0 for k0, v0 in sql_args.items() if k0 in arg_list}
+    
+    conn_url = sqlalchemy.engine.URL.create(f"{db_dialect}+{db_driver}"
+                                            , **sql_args
+                                            )
+    
+    server_side_cursors_arg = db_dialect not in ("access")
+    return sqlalchemy.create_engine(conn_url
+                                    , server_side_cursors=server_side_cursors_arg
+                                    )
 
 def check_json(str0):
     try:
@@ -455,7 +490,7 @@ if __name__ == '__main__':
 #         'db_dialect': 'oracle'
 #         , 'db_driver': 'cx_Oracle'
 #         , "host": "localhost"
-#         , "user": "Dyson"
+#         , 'username': "Dyson"
 #         , "password": "122321"
 #         , 'sid': 'ORCL'
 #         , 'dbname': 'HR'
@@ -465,45 +500,47 @@ if __name__ == '__main__':
 # =============================================================================
 
 #    # 测试本地MySQL参数
-#    sql_args = {
-#        'db_dialect': 'MySQL'
-#        , 'db_driver': 'pymysql'
-#        , "host": "192.168.50.188"
-#        , "user": "Dyson"
-#        , "password": "122321"
-#        , 'dbname': 'test'
-#        , 'data_type': 'DataFrame'
-#    }
+    # sql_args = {
+    #     'db_dialect': 'MySQL'
+    #     , 'db_driver': 'pymysql'
+    #     , "host": "192.168.50.188"
+    #     , 'username': "Dyson"
+    #     , "password": "122321"
+    #     , 'dbname': 'test'
+    #     , 'data_type': 'DataFrame'
+    # }
 #    df = connect(sql_args, 'SELECT * FROM `new_tzxm_infos`')
 
 #    df['if_json'] = df['project_info'].apply(lambda s: check_json(s))
 #
 #    print(df.loc[df['if_json']==False, 'project_code'].to_list())
 
-    # # 测试本地MySQL参数
-    # sql_args = {
-    #     'db_dialect': 'MySQL'
-    #     , 'db_driver': 'pymysql'
-    #     , "host": "192.168.50.188"
-    #     , "user": "Dyson"
-    #     , "password": "122321"
-    #     , 'dbname': 'test'
-    #     , 'data_type': 'DataFrame'
-    # }
-    # df = run_sql(sql_args, 'SELECT * FROM `new_tzxm_infos`')
-
-    # 测试本地PostgreSQL参数
+    # 测试本地MySQL参数
     sql_args = {
-        'db_dialect': 'PostgreSQL'
-        , "db_driver": 'psycopg2'
-        , "host": "localhost"
-        , "user": "dyson"
-        , "password": "1qqaq1"
+        'db_dialect': 'MySQL'
+        , 'db_driver': 'pymysql'
+        , "host": "192.168.50.188"
+        , 'username': "Dyson"
+        , "password": "122321"
         , 'dbname': 'test'
-        , 'data_type': 'DataFrame'
+
     }
-    df = run_sql(sql_args, 'SELECT * FROM vote_record_memory LIMIT 10')
-    print(df)
+    print(run_sql(sql_args, 'SELECT * FROM ``'))
+
+# =============================================================================
+#     # 测试本地PostgreSQL参数
+#     sql_args = {
+#         'db_dialect': 'PostgreSQL'
+#         , "db_driver": 'psycopg2'
+#         , "host": "localhost"
+#         , 'username': "dyson"
+#         , "password": "1qqaq1"
+#         , 'dbname': 'test'
+#         , 'data_type': 'DataFrame'
+#     }
+#     df = run_sql(sql_args, 'SELECT * FROM vote_record_memory LIMIT 10')
+#     print(df)
+# =============================================================================
 
 
 # =============================================================================
@@ -522,3 +559,17 @@ if __name__ == '__main__':
 #    sql_manager.update_df_data(sql_args, df, 'JOBS'
 #                               , df_col='test', table_col='test'
 #                               , df_keys=['JOB_ID', "JOB_TITLE"], table_keys=['JOB_ID', "JOB_TITLE"])
+
+# =============================================================================
+#     # 测试本地Access参数
+#     sql_args = {
+#         'db_dialect': 'Access'
+#         , 'file_path': r'C:\Users\Weave\Desktop\BW\BW_IMPORT_202206.accdb'
+#     }
+#     
+#     # df = run_sql(sql_args, 'SELECT * FROM vote_record_memory LIMIT 10')
+#     engine = __sql_engine(__standardize_args(sql_args))
+#     print((engine))
+#     with engine.connect() as conn:
+#         print(conn.execute(sqlalchemy.text("SELECT top 10 * FROM import")).fetchall())
+# =============================================================================
