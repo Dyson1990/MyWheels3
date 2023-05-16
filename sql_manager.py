@@ -58,56 +58,6 @@ oracle_type2np_type = {
         , sqlalchemy.dialects.oracle.base.NUMBER: np.dtype('float64')
         }
 
-def run_sql(sql_args, sql, args=None):
-    """
-    最常用的连接MySQL的方式
-    sql 可以是一条sql语句， 也可以是sql语句组成的列表
-    :return: list
-
-    若要转换为dataframe
-    data = [list(t) for t in data] # 要求传入列表，不能是元组
-    data = pd.DataFrame(data, columns=rp.keys())
-    """
-    data = []
-
-    sql_args = __standardize_args(sql_args)
-
-    try:
-        # 使用哪种数据库，填入Oralce，MySQL等等
-        engine = __sql_engine(sql_args)
-
-        with closing(engine.connect()) as conn:
-            # 选择数据库
-            global dbname_str
-            db_dialect = sql_args['db_dialect']
-            if db_dialect in dbname_str:
-                sql0 = sqlalchemy.text(dbname_str[db_dialect].format(sql_args['database']))
-                conn.execute(sql0)
-
-            # 多条SQL语句的话，循环执行
-            # rp short for ResultProxy
-            if isinstance(sql,list):
-                for sql0 in sql:
-                    sql0 = sqlalchemy.text(sql0)
-                    rp = conn.execute(sql0)
-            elif args:
-                sql = sqlalchemy.text(sql)
-                rp = conn.execute(sql,args)
-            else:
-                sql = sqlalchemy.text(sql)
-                rp = conn.execute(sql)
-
-            if rp is None:
-                return None
-            data = rp.fetchall()
-            # 若要返回dataframe，使用pd.read_sql
-            return data
-    except:
-        print("数据库交互出错：\n%s" % traceback.format_exc())
-        return None
-
-
-
 def __standardize_args(sql_args):
     # 检查所需参数是否都存在，规范输入的一些参数
 
@@ -218,6 +168,11 @@ def check_json(str0):
         return False
     else:
         return True
+    
+class TableMapping():
+    
+    def __init__(self):
+        pass
 
 if __name__ == '__main__':
     # 测试本地MySQL参数
@@ -232,3 +187,53 @@ if __name__ == '__main__':
     }
     # print(run_sql(sql_args, 'SELECT * FROM ``'))
     # pd.DataFrame([]).to_sql()
+    
+# =============================================================================
+# def run_sql(sql_args, sql, args=None):
+#     """
+#     最常用的连接MySQL的方式
+#     sql 可以是一条sql语句， 也可以是sql语句组成的列表
+#     :return: list
+# 
+#     若要转换为dataframe
+#     data = [list(t) for t in data] # 要求传入列表，不能是元组
+#     data = pd.DataFrame(data, columns=rp.keys())
+#     """
+#     data = []
+# 
+#     sql_args = __standardize_args(sql_args)
+# 
+#     try:
+#         # 使用哪种数据库，填入Oralce，MySQL等等
+#         engine = __sql_engine(sql_args)
+# 
+#         with closing(engine.connect()) as conn:
+#             # 选择数据库
+#             global dbname_str
+#             db_dialect = sql_args['db_dialect']
+#             if db_dialect in dbname_str:
+#                 sql0 = sqlalchemy.text(dbname_str[db_dialect].format(sql_args['database']))
+#                 conn.execute(sql0)
+# 
+#             # 多条SQL语句的话，循环执行
+#             # rp short for ResultProxy
+#             if isinstance(sql,list):
+#                 for sql0 in sql:
+#                     sql0 = sqlalchemy.text(sql0)
+#                     rp = conn.execute(sql0)
+#             elif args:
+#                 sql = sqlalchemy.text(sql)
+#                 rp = conn.execute(sql,args)
+#             else:
+#                 sql = sqlalchemy.text(sql)
+#                 rp = conn.execute(sql)
+# 
+#             if rp is None:
+#                 return None
+#             data = rp.fetchall()
+#             # 若要返回dataframe，使用pd.read_sql
+#             return data
+#     except:
+#         print("数据库交互出错：\n%s" % traceback.format_exc())
+#         return None
+# =============================================================================
