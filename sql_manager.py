@@ -393,7 +393,7 @@ def __standardize_args(sql_args):
 
     # 不同的数据库，需要的参数不同
     if db_dialect == 'oracle':
-        needed_args = ['db_dialect', 'host', 'username', 'password', 'sid', 'dbname']
+        needed_args = ['db_dialect', 'host', 'username', 'password', 'sid', 'database']
 
         # Oracle的数据类型比较特殊
         global np_type2sql_type,sql_type2np_type,np_type2oracle_type,oracle_type2np_type
@@ -417,6 +417,7 @@ def __standardize_args(sql_args):
     if db_dialect == 'oracle':
         sql_args['db_driver'] = sql_args.get('db_driver', 'cx_oracle').lower()
         sql_args['port'] = sql_args.get('port', '1521')
+        sql_args['query']={"sid": sql_args['sid']}
         
     elif db_dialect == 'mysql':
         sql_args['db_driver'] = sql_args.get('db_driver', 'pymysql').lower()
@@ -466,14 +467,16 @@ def __sql_engine(sql_args):
     arg_list = ("username", "password","host","port","database","query") #URL.create()不接受其他参数 
     sql_args = {k0: v0 for k0, v0 in sql_args.items() if k0 in arg_list}
     
-    conn_url = sqlalchemy.engine.URL.create(f"{db_dialect}+{db_driver}"
-                                            , **sql_args
-                                            )
+    conn_url = sqlalchemy.engine.URL.create(
+        f"{db_dialect}+{db_driver}"
+        , **sql_args
+    )
     
     server_side_cursors_arg = db_dialect not in ("access")
-    return sqlalchemy.create_engine(conn_url
-                                    , server_side_cursors=server_side_cursors_arg
-                                    )
+    return sqlalchemy.create_engine(
+        conn_url
+        , server_side_cursors=server_side_cursors_arg
+        )
 
 def check_json(str0):
     try:
@@ -526,6 +529,7 @@ if __name__ == '__main__':
 
     }
     print(run_sql(sql_args, 'SELECT * FROM ``'))
+    pd.DataFrame([]).to_sql()
 
 # =============================================================================
 #     # 测试本地PostgreSQL参数
