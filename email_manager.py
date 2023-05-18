@@ -36,8 +36,8 @@ class Email:
         
 class Email163(Email):
     
-    def __init__(self, my_email):
-        super(Email163,self).__init__(my_email)
+    # def __init__(self, my_email):
+    #     super(Email163,self).__init__(my_email)
         
     def send(self, pwd="GOELDMAMTDWBEPLG"):
         smtp = smtplib.SMTP_SSL("smtp.163.com", 465) # GOELDMAMTDWBEPLG
