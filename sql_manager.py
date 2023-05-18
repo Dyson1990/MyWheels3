@@ -8,57 +8,27 @@
     @info: 个人常用代码，由于处于学习阶段，不打算用pandas中的read_csv、to_csv
 --------------------------------
 """
-import traceback
-
 import sqlalchemy
 import sqlalchemy.orm
 import sqlalchemy.ext.automap
-import sqlalchemy.dialects.oracle
+import urllib.parse as urlparse
 
-import pandas as pd
-import numpy as np
+from pathlib import Path
 from contextlib import closing
-import json
+from loguru import logger
 
 # =============================================================================
-# eng_str = {
-#         'oracle':"{db_dialect}+{db_driver}://{user}:{password}@{host}:{port}/{sid}?charset={charset}"
-#         , 'mysql': "{db_dialect}+{db_driver}://{user}:{password}@{host}:{port}/{dbname}?charset={charset}"
-#         , 'postgresql': "{db_dialect}+{db_driver}://{user}:{password}@{host}:{port}/{dbname}"
+# # 选择数据库
+# dbname_str = {
+#         'oracle':"ALTER SESSION SET CURRENT_SCHEMA = \"{}\""
+#         , 'mysql':"USE `{}`"
+#         # , 'postgresql':"\c {}"
 #         }
 # =============================================================================
 
-# 选择数据库
-dbname_str = {
-        'oracle':"ALTER SESSION SET CURRENT_SCHEMA = \"{}\""
-        , 'mysql':"USE `{}`"
-        # , 'postgresql':"\c {}"
-        }
-np_type2sql_type = {
-        np.dtype('int64'): sqlalchemy.sql.sqltypes.Integer
-        , np.dtype('float64'): sqlalchemy.sql.sqltypes.FLOAT
-        , np.dtype('O'): sqlalchemy.sql.sqltypes.VARCHAR
-        }
-sql_type2np_type = {
-        sqlalchemy.sql.sqltypes.FLOAT: np.dtype('float64')
-        , sqlalchemy.sql.sqltypes.Integer: np.dtype('int64')
-        , sqlalchemy.sql.sqltypes.DateTime: np.dtype('datetime64[ns]')
-        , sqlalchemy.sql.sqltypes.VARCHAR: np.dtype('O')
-        }
-np_type2oracle_type = {
-        np.dtype('int64'): sqlalchemy.dialects.oracle.base.INTEGER
-        , np.dtype('float64'): sqlalchemy.dialects.oracle.base.FLOAT
-        , np.dtype('O'): sqlalchemy.dialects.oracle.base.VARCHAR2
-        }
-oracle_type2np_type = {
-        sqlalchemy.dialects.oracle.base.FLOAT: np.dtype('float64')
-        , sqlalchemy.dialects.oracle.base.INTEGER: np.dtype('int64')
-        , sqlalchemy.dialects.oracle.base.DATE: np.dtype('datetime64[ns]')
-        , sqlalchemy.dialects.oracle.base.VARCHAR2: np.dtype('O')
-        , sqlalchemy.dialects.oracle.base.NUMBER: np.dtype('float64')
-        }
-
-def __standardize_args(sql_args):
+def __standardize_args(
+        sql_args: dict
+        ) -> dict:
     # 检查所需参数是否都存在，规范输入的一些参数
 
     if not isinstance(sql_args, dict):
@@ -129,21 +99,10 @@ def __standardize_args(sql_args):
     #######################################################################
     return sql_args
 
-# =============================================================================
-# def __sql_engine(sql_args):
-#     # 编辑salalchemy中的数据库参数字符串
-#     global eng_str
-#     db_dialect = sql_args['db_dialect']
-# 
-#     # server_side_cursors_arg = db_dialect not in ("access")
-#     engine = sqlalchemy.create_engine(eng_str[db_dialect].format(**sql_args)
-#                                       # , echo=True
-#                                       , server_side_cursors=True
-#                                       )
-#     return engine
-# =============================================================================
-
-def __sql_engine(sql_args):
+def __sql_engine(
+        sql_args: dict
+        ) -> sqlalchemy.engine.base.Engine:
+    
     sql_args = sql_args.copy()
     db_dialect = sql_args.pop('db_dialect')
     db_driver = sql_args.pop('db_driver')
@@ -154,39 +113,93 @@ def __sql_engine(sql_args):
         f"{db_dialect}+{db_driver}"
         , **sql_args
     )
+    logger.info("数据库连接url为："+urlparse.unquote(conn_url.render_as_string()))
     
-    server_side_cursors_arg = db_dialect not in ("access")
-    return sqlalchemy.create_engine(
-        conn_url
-        , server_side_cursors=server_side_cursors_arg
-        )
+    return sqlalchemy.create_engine(conn_url)
 
-def check_json(str0):
-    try:
-        json.loads(str0)
-    except:
-        return False
+def get_type_obj(
+        engine: sqlalchemy.engine.base.Engine
+        , type_str: str
+        ) -> type:
+    
+    if engine.name in dir(sqlalchemy.dialects):
+        base0 = getattr(sqlalchemy.dialects, engine.name).base
     else:
-        return True
+        logger.warning(f"{engine.name}不存在于sqlalchemy.dialects，使用了默认数据类型")
+        base0 = sqlalchemy.sql.sqltypes
+    
+    type_dict = {s0.upper(): s0 for s0 in dir(base0)}
+    return getattr(base0, type_dict[type_str.upper()], None)
+    
+def table_meta(
+        engine: sqlalchemy.engine.base.Engine
+        , tn: str
+        ) -> sqlalchemy.orm.decl_api.DeclarativeMeta:
+    
+    metadata = sqlalchemy.schema.MetaData()
+    metadata.reflect(engine, schema=engine.url.database)
+    base = sqlalchemy.ext.automap.automap_base(metadata=metadata)
+    base.prepare()
+    
+    return getattr(base.classes, tn) # DeclarativeMeta对象
+
+def alter_table_dtype(engine, t_obj, col_name, new_type, confirm=True):
+    sql = "ATLTER TABLE "
+    logger.warning(f"正准备修改字段{col_name}的类型=>"+new_type)
+    if confirm:
+        b0 = input("是否修改(Y/n)")
+    else:
+        b0 = "Y"
+        
+    if b0 == "Y":
+        with closing(engine.connect()) as conn:
+            conn.execute(sql)
     
 class TableMapping():
-    
-    def __init__(self):
+    """待完成，没有找到一个可以直接输出表对象的方式"""
+    def __init__(self, engine):
         pass
+        
 
 if __name__ == '__main__':
+# =============================================================================
+#     # 测试本地Access参数
+#     sql_args = {
+#         'db_dialect': 'Access'
+#         , 'file_path': r'C:\Users\Weave\Desktop\BW\BW_EXPORT_202301.accdb'
+#     }
+#     
+#     engine = __sql_engine(__standardize_args(sql_args))
+#     print(get_type_obj(engine, "string"))
+#     # with engine.connect() as conn:
+#     #     print(conn.execute(sqlalchemy.text("SELECT top 1 * FROM export")).fetchall())
+# =============================================================================
+    
     # 测试本地MySQL参数
     sql_args = {
         'db_dialect': 'MySQL'
         , 'db_driver': 'pymysql'
-        , "host": "192.168.50.188"
+        , "host": "192.168.1.231"
         , 'username': "Dyson"
-        , "password": "122321"
+        , "password": "1qqaq1"
         , 'dbname': 'test'
-
+        , 'table_name': 'vote_record'
     }
-    # print(run_sql(sql_args, 'SELECT * FROM ``'))
-    # pd.DataFrame([]).to_sql()
+
+        # with closing(engine.connect()) as conn:
+        #     print(conn.execution_options())
+    
+    sql_args = __standardize_args(sql_args)
+    # 使用哪种数据库，填入Oralce，MySQL等等
+    engine = __sql_engine(sql_args)
+    
+    t_meta = table_meta(engine, "vote_record")
+    
+    row = t_meta()
+    print(type(row))
+    print(row.user_id)
+    print(t_meta.user_id)
+    # print(dir(t_meta))
     
 # =============================================================================
 # def run_sql(sql_args, sql, args=None):
