@@ -193,13 +193,26 @@ if __name__ == '__main__':
     # 使用哪种数据库，填入Oralce，MySQL等等
     engine = __sql_engine(sql_args)
     
-    t_meta = table_meta(engine, "vote_record")
+    # t_meta = table_meta(engine, "vote_record")
     
-    row = t_meta()
-    print(type(row))
-    print(row.user_id)
-    print(t_meta.user_id)
-    # print(dir(t_meta))
+    # row = t_meta()
+    # print(type(row))
+    # print(row.user_id)
+    # print(t_meta.user_id)
+    
+    try:
+        # 初始化会话
+        mk_session = sqlalchemy.orm.sessionmaker(bind=engine)
+        session = mk_session()
+        
+        print(dir(session))
+
+        # 没有发生错误，则提交提交结果
+        session.commit()
+    except:
+        session.rollback()
+    finally:
+        session.close()
     
 # =============================================================================
 # def run_sql(sql_args, sql, args=None):
