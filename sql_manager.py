@@ -5,7 +5,9 @@
     @Contact: Weaver1990@163.com
     @file: sql_manager.py
     @time: 2017/3/15 14:23
-    @info: 个人常用代码，由于处于学习阶段，不打算用pandas中的read_csv、to_csv
+    
+    @info: 目前还不知道怎么改写sqlalchemy里的类，所以先不自建类了，先粗糙的满足日常需求。
+    
 --------------------------------
 """
 import sqlalchemy
@@ -130,21 +132,29 @@ def get_type_obj(
     
     type_dict = {s0.upper(): s0 for s0 in dir(base0)}
     return getattr(base0, type_dict[type_str.upper()], None)
-    
-def table_meta(
-        engine: sqlalchemy.engine.base.Engine
-        , tn: str
-        ) -> sqlalchemy.orm.decl_api.DeclarativeMeta:
-    
+
+def sa_base(engine: sqlalchemy.engine.base.Engine):
     metadata = sqlalchemy.schema.MetaData()
     metadata.reflect(engine, schema=engine.url.database)
     base = sqlalchemy.ext.automap.automap_base(metadata=metadata)
     base.prepare()
     
+    return base
+
+def ddl_show_tables(base):
+    # return dict(base.classes)
+    return base.metadata.tables
+    
+def table_meta(
+        base: sqlalchemy.orm.decl_api.DeclarativeMeta
+        , tn: str
+        ) -> sqlalchemy.orm.decl_api.DeclarativeMeta:
     return getattr(base.classes, tn) # DeclarativeMeta对象
 
-def alter_table_dtype(engine, t_obj, col_name, new_type, confirm=True):
-    sql = "ATLTER TABLE "
+def t_cols(t_meta):
+    return dict(t_meta._sa_class_manager)
+
+def alter_table_dtype(engine, t_meta, col_name, new_type, confirm=True):
     logger.warning(f"正准备修改字段{col_name}的类型=>"+new_type)
     if confirm:
         b0 = input("是否修改(Y/n)")
@@ -153,13 +163,13 @@ def alter_table_dtype(engine, t_obj, col_name, new_type, confirm=True):
         
     if b0 == "Y":
         with closing(engine.connect()) as conn:
+            sql = f"ATLTER TABLE {t_meta.name} MODIFY COLUMN {col_name} {new_type};"
             conn.execute(sql)
     
 class TableMapping():
     """待完成，没有找到一个可以直接输出表对象的方式"""
     def __init__(self, engine):
         pass
-        
 
 if __name__ == '__main__':
 # =============================================================================
@@ -179,7 +189,7 @@ if __name__ == '__main__':
     sql_args = {
         'db_dialect': 'MySQL'
         , 'db_driver': 'pymysql'
-        , "host": "192.168.1.231"
+        , "host": "192.168.1.250"
         , 'username': "Dyson"
         , "password": "1qqaq1"
         , 'dbname': 'test'
@@ -193,19 +203,52 @@ if __name__ == '__main__':
     # 使用哪种数据库，填入Oralce，MySQL等等
     engine = __sql_engine(sql_args)
     
-    # t_meta = table_meta(engine, "vote_record")
+    base = sa_base(engine)
+    # print(dir(base))
+    # print(type(base))
+    # print(dir(base.metadata))
+    # print(base.metadata.tables)
     
-    # row = t_meta()
-    # print(type(row))
-    # print(row.user_id)
-    # print(t_meta.user_id)
+    t_obj = base.metadata.tables['test.employees']
+    print(dir(t_obj))
+    print(type(t_obj))
+    # print(dir(base.metadata))
+    # print(base.metadata.tables) 
+    
+    t_meta = dict(base.classes)['employees']
+    print(dir(t_meta))
+    print(type(t_meta))
+
+    
+    # t_meta = table_meta(base, "vote_record_memory")
+    # print(type(t_meta))
+    
+    # print(type(t_meta))
+    # # print(type(t_meta()))
+    # print(dir(t_meta))
+    # print(t_cols(t_meta))
+    
+    # col = t_cols(t_meta)["user_id"]
+    
+    # print(dir(col))
+    # print(type(col))
+    # print(dir(row.metadata))
+    # print(col.type)
+    # print(row.metadata.tables)
+    
+    # dtype = col.type
+    # print(dir(dtype))
+    # print(type(dtype))
+    # print(dtype.length)
+    # dtype.length = 50
+    # print(dtype.length)
     
     try:
         # 初始化会话
         mk_session = sqlalchemy.orm.sessionmaker(bind=engine)
         session = mk_session()
         
-        print(dir(session))
+        # print(dir(session))
 
         # 没有发生错误，则提交提交结果
         session.commit()
@@ -213,7 +256,53 @@ if __name__ == '__main__':
         session.rollback()
     finally:
         session.close()
-    
+        
+        
+# =============================================================================
+# from alembic.config import Config
+# from alembic.command import upgrade as alembic_upgrade
+# import sqlalchemy as sa
+# from alembic import op
+# 
+# # 配置 Alembic
+# alembic_cfg = Config()
+# alembic_cfg.set_main_option('script_location', 'path/to/migrations')
+# alembic_cfg.set_main_option('url', 'postgresql://user:password@host/dbname')
+# 
+# # 捕获 SQL 输出，存储到字符串变量
+# sql_string = ''
+# def collect_sql(stdout):
+#     global sql_string
+#     sql_string += stdout
+# 
+# def upgrade():
+#     # 使用 BatchOperations.alter_column() 方法修改表格 users 的 name 列的数据类型
+#     with op.batch_alter_table('users') as batch_op:
+#         batch_op.alter_column('name', type_=sa.TEXT)
+# 
+# def downgrade():
+#     # 恢复之前的数据类型
+#     with op.batch_alter_table('users') as batch_op:
+#         batch_op.alter_column('name', type_=sa.String(255))
+# 
+# # 使用 Alembic 生成 SQL 脚本
+# with sa.create_engine('postgresql://user:password@host/dbname').connect() as conn:
+#     trans = conn.begin()
+#     try:
+#         # 执行迁移操作，并输出 SQL
+#         alembic_upgrade(alembic_cfg, revision='head', sql=True, stdout=collect_sql)
+#         trans.commit()
+# 
+#         # 打印 SQL 输出
+#         print(sql_string)
+# 
+#         # 手动执行 SQL
+#         conn.execute(sql_string)
+#     except:
+#         trans.rollback()
+#         raise
+#     
+# =============================================================================
 # =============================================================================
 # def run_sql(sql_args, sql, args=None):
 #     """
