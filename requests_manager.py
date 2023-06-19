@@ -16,6 +16,7 @@ import time
 from pathlib import Path
 from loguru import logger
 from anti_useragent import UserAgent
+from pathlib import Path
 ua = UserAgent()
 
 headers = {'Accept': '*/*',
@@ -76,19 +77,40 @@ def get_html(url, **kwargs):
 
 def get_file(url, targetfile):
     global headers
-    req = requests.get(url, headers=headers)
-    with open(targetfile, "wb") as code:
-        code.write(req.content)
-        print("====>>>Successfully saving %s" %targetfile)
+    from tqdm import tqdm
+    # req = requests.get(url, headers=headers)
+    # with open(targetfile, "wb") as code:
+    #     code.write(req.content)
+    #     print("====>>>Successfully saving %s" %targetfile)
+    resp = requests.get(url, headers=headers, stream=True)
+    
+    # 获取要下载文件的总大小（单位：字节）
+    total_size = int(resp.headers.get('Content-Length', 0))
+    
+    # 将总大小从字节转换为 MB，并保留两位小数
+    total_size_mb = round(total_size / (1024 * 1024), 2)
+    
+    # 创建一个进度条对象，并设置描述信息以及总大小
+    progress_bar = tqdm(total=total_size_mb, unit='MB', desc=url.split('/')[-1], ncols=80)
+    with open(targetfile, 'wb') as fw:
+        for data in resp.iter_content(chunk_size=1024):
+            # 将下载到的数据写入文件中
+            fw.write(data)
+            # 更新进度条的当前值
+            progress_bar.update(len(data) / (1024 * 1024))
+    # 关闭进度条
+    progress_bar.close()
         
 def get_binary_image(url):
     global headers
     req = requests.get(url, headers=headers)
     try:
         binary_img = base64.b64encode(req.text)
-    except:
-        raise Exception('网站response中编码不正确，或者返回的不是图片。')
-    return binary_img
+        return binary_img
+    except Exception as e0:
+        logger.exception(e0)
+    
+
 
 if __name__ == '__main__':
     ip = get_html('https://icanhazip.com'
