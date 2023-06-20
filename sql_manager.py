@@ -19,6 +19,54 @@ from pathlib import Path
 from contextlib import closing
 from loguru import logger
 
+# 设计的还是有问题
+defaults = {
+    'oracle': {
+        'host': {'required': True},
+        'username': {'required': True},
+        'password': {'required': True},
+        'sid': {'required': True},
+        'database': {'required': True},
+        'method': {'default': None},
+        'db_driver': {'default': 'cx_oracle', 'lower': True},
+        'db_dialect': {'lower': True},
+        'port': {'default': 1521},
+    },
+    'mysql': {
+        'host': {'required': True},
+        'username': {'required': True},
+        'password': {'required': True},
+        'database': {'required': True},
+        'method': {'default': None},
+        'db_driver': {'default': 'pymysql', 'lower': True},
+        'db_dialect': {'lower': True},
+        'port': {'default': 3306},
+        'charset': {'default': 'UTF8MB4'},
+    },
+    'postgresql': {
+        'host': {'required': True},
+        'username': {'required': True},
+        'password': {'required': True},
+        'database': {'required': True},
+        'method': {'default': None},
+        'db_driver': {'default': 'psycopg2', 'lower': True},
+        'db_dialect': {'lower': True},
+        'port': {'default': 5432},
+    },
+    'access': {
+        'file_path': {'required': True},
+        'username': {'required': True},
+        'method': {'default': None},
+        'db_driver': {'default': 'pyodbc', 'lower': True},
+        'db_dialect': {'lower': True},
+    }
+}
+
+key_mapping = {
+    'user': 'username'
+    , 'dbname': 'database'
+    }
+
 # =============================================================================
 # # 选择数据库
 # dbname_str = {
@@ -36,58 +84,31 @@ def __standardize_args(
     if not isinstance(sql_args, dict):
         raise Exception("sql_args格式错误！！！")
     
-    # 规范输入的大小写
-    sql_args['db_dialect'] = sql_args['db_dialect'].lower()
-    db_dialect = sql_args['db_dialect']
+    # 确定哪个数据库
+    db_dialect = sql_args['db_dialect'].lower()
+    global defaults
+    defaults0 = defaults[db_dialect].copy()
     
     # 兼容新旧版本
-    if 'user' in sql_args and 'username' not in sql_args:
-        sql_args['username'] = sql_args.pop('user')
-    if 'dbname' in sql_args and 'database' not in sql_args:
-        sql_args['database'] = sql_args.pop('dbname')
+    global key_mapping
+    sql_args = {key_mapping.get(k0, k0): v0 for k0, v0 in sql_args.items()}
 
-    # 不同的数据库，需要的参数不同
-    if db_dialect == 'oracle':
-        needed_args = ['db_dialect', 'host', 'username', 'password', 'sid', 'database']
-
-        # Oracle的数据类型比较特殊
-        global np_type2sql_type,sql_type2np_type,np_type2oracle_type,oracle_type2np_type
-        np_type2sql_type = np_type2oracle_type
-        sql_type2np_type = oracle_type2np_type
-    elif db_dialect == 'mysql':
-        needed_args = ['db_dialect', 'host', 'username', 'password', 'database']
-    elif db_dialect == 'postgresql':
-        needed_args = ['db_dialect', 'host', 'username', 'password', 'database']
-    elif db_dialect == 'access':
-        needed_args = ['db_dialect', 'file_path']
-
-    # 缺少参数则报错，
+    # 缺少参数则报错
+    needed_args = [k0 for k0, d0 in defaults0.items() if d0.get('required')==True]
     check_args = [s for s in needed_args if s not in sql_args]
     if check_args:
         raise Exception("缺少数据库参数：%s" % '，'.join(check_args))
 
     # 规定默认的参数的值 ##################################################
-    sql_args['method'] = sql_args.get('method', None) # 没有参数传入，则使用fetchall
-    sql_args['data_type'] = sql_args.get('data_type', 'list')
+    
+    for k0 in defaults0.keys():
+        if k0 not in sql_args \
+        and k0 in defaults0 \
+        and 'default' in defaults0[k0]:
+            sql_args[k0] = defaults0[k0]['default']
+    
     if db_dialect == 'oracle':
-        sql_args['db_driver'] = sql_args.get('db_driver', 'cx_oracle').lower()
-        sql_args['port'] = sql_args.get('port', '1521')
         sql_args['query']={"sid": sql_args['sid']}
-        
-    elif db_dialect == 'mysql':
-        sql_args['db_driver'] = sql_args.get('db_driver', 'pymysql').lower()
-        sql_args['port'] = sql_args.get('port', '3306')
-        sql_args['charset'] = sql_args.get('charset', 'UTF8MB4')
-        """
-        这种错误很有可能是SQL驱动不完整
-        也可能是数据库的编码与申请的编码不符
-        1366, "Incorrect string value: '\\xD6\\xD0\\xB9\\xFA\\xB1\\xEA...' for column 'VARIABLE_VALUE' at row 484")
-        """
-        
-    elif db_dialect == 'postgresql':
-        sql_args['db_driver'] = sql_args.get('db_driver', 'psycopg2').lower()
-        sql_args['port'] = sql_args.get('port', '5432')
-
     elif db_dialect == 'access':
         sql_args['db_driver'] = sql_args.get('db_driver', 'pyodbc').lower()
 
@@ -97,6 +118,12 @@ def __standardize_args(
             r"ExtendedAnsiSQL=1;"
             )
         sql_args['query']={"odbc_connect": connection_string}
+        
+    for k0 in defaults0.keys():
+        if k0 in sql_args \
+        and k0 in defaults0 \
+        and defaults0[k0].get('lower')==True:
+            sql_args[k0] = sql_args[k0].lower()
         
     #######################################################################
     return sql_args
@@ -189,7 +216,7 @@ if __name__ == '__main__':
     sql_args = {
         'db_dialect': 'MySQL'
         , 'db_driver': 'pymysql'
-        , "host": "192.168.1.250"
+        , "host": "192.168.1.125"
         , 'username': "Dyson"
         , "password": "1qqaq1"
         , 'dbname': 'test'
