@@ -107,6 +107,7 @@ def __standardize_args(
         and 'default' in defaults0[k0]:
             sql_args[k0] = defaults0[k0]['default']
     
+    # 额外的参数赋值
     if db_dialect == 'oracle':
         sql_args['query']={"sid": sql_args['sid']}
     elif db_dialect == 'access':
