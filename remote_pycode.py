@@ -51,10 +51,3 @@ if __name__ == "__main__":
     
     # 调用新模块的 hello() 函数
     print(new_module.check_json)
-    
-    
-    # bytecode = cloudpickle.dumps(obj)
-    # print(bytecode)
-    # 在远程服务器上反序列化并执行字节码
-    # my_module = cloudpickle.loads(bytecode)
-    # return my_module

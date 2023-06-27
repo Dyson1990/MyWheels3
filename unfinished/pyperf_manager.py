@@ -5,35 +5,129 @@ Created on Tue Jun 20 17:24:03 2023
 @author: Weave
 """
 
+from pathlib import Path
 from pyperf import Runner
-from my_module import my_function
+from faker import Faker
+import importlib.util
 
-# 创建基准测试 runner 实例
-runner = Runner()
+# 暂时不能用
 
-# 定义一组不同大小的输入数据，并向 runner 注册测试函数
-inputs = [
-    ("small", [1, 2, 3]),
-    ("medium", list(range(1000))),
-    ("large", list(range(100000))),
-]
+# def run_text(my_function, inputs, report_p=Path("benchmark_results.json")):
+#     # 创建基准测试 runner 实例
+#     runner = Runner()
+    
+#     for name, input_data in inputs:
+#         def test_func():
+#             my_function(input_data)
+    
+#         runner.bench_func(name, test_func)
+    
+#     # 运行基准测试并生成报告
+#     results = runner.run()
+    
+#     # 将测试结果保存到 JSON 文件中
+#     with open(report_p, "w") as f:
+#         results.dump(f)
+    
+#     # 在控制台中打印测试报告
+#     results.display(show_metadata=True)
 
-for name, input_data in inputs:
-    def test_func():
-        my_function(input_data)
+def faker_data(nrows):
+    fake = Faker('zh_CN')
 
-    runner.bench_func(name, test_func)
+    for _ in range(nrows):
+        yield {
+            'name': fake.name(),
+            'address': fake.address(),
+            'email': fake.email(),
+            'phone_number': fake.phone_number(),
+            'date_time': fake.date_time(),
+            'integer': fake.random_int(),
+            'float_num': fake.pyfloat(),
+            'text': fake.text(),
+            'boolean': fake.boolean(),
+            'url': fake.url()
+        }
+        
+def insert_update_test(d_fields, d_rows):
+    import pymysql
+    from functools import reduce
+    # 连接 MySQL 数据库
+    conn = pymysql.connect(
+        host='192.168.1.23',  # 数据库地址
+        user='root',       # 数据库用户名
+        password='*ycy123*', # 数据库密码
+        database='tmp'  # 数据库名称
+    )
+    
+    # 创建游标对象
+    cur = conn.cursor()
+    
+    # 建表语句
+    create_table_sql = """
+    CREATE TABLE IF NOT EXISTS fake_data (
+      `id` INT NOT NULL AUTO_INCREMENT,
+      `name` VARCHAR(255) NOT NULL,
+      `address` VARCHAR(255) NOT NULL,
+      `email` VARCHAR(255) NOT NULL,
+      `phone_number` VARCHAR(20) NOT NULL,
+      `date_time` DATETIME NOT NULL,
+      `integer` INT NOT NULL,
+      `float_num` FLOAT(6, 2) NOT NULL,
+      `text` TEXT NOT NULL,
+      `boolean` BOOLEAN NOT NULL,
+      `url` VARCHAR(255) NOT NULL,
+      PRIMARY KEY (id)
+    );
+    """
+    
+    # 执行建表操作
+    cur.execute(create_table_sql)
+    
+    # 插入假数据到 MySQL 数据库中
+    blanks = ",".join(["(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)" * len(d_rows)])
+    d_fields = [f"`{s0}`" for s0 in d_fields]
+    sql = f'INSERT INTO fake_data ({",".join(d_fields)}) VALUES {blanks}'
+    val = tuple(reduce(lambda l1, l2: l1 + l2, d_rows))
+    cur.execute(sql, val)
+    conn.commit()
+    
+    # 关闭游标和数据库连接
+    cur.close()
+    conn.close()
 
-# 运行基准测试并生成报告
-results = runner.run()
+if __name__ == "__main__":
+    # spec = importlib.util.spec_from_file_location("my_module", "/path/to/my_module.py")
+    # my_module = importlib.util.module_from_spec(spec)
+    # spec.loader.exec_module(my_module)
+    
+    # 创建基准测试 runner 实例
+    runner = Runner()
+    
+    for nrows in range(1000, 20000, 3000):
+        nrows = nrows + 1
+        data_gen = faker_data(nrows)
+        
+        fields = next(data_gen).keys()
+        rows = [d0.items() for d0 in data_gen]
+        
+        def test_func():
+            insert_update_test(fields, rows)
+        
+        runner.bench_func(f"nrows[{nrows-1}]", test_func)
 
-# 将测试结果保存到 JSON 文件中
-with open("benchmark_results.json", "w") as f:
-    results.dump(f)
-
-# 在控制台中打印测试报告
-results.display(show_metadata=True)
-
+        
+    # 运行基准测试并生成报告
+    results = runner.run()
+        
+    # 将测试结果保存到 JSON 文件中
+    with open(Path("benchmark_results.json"), "w") as f:
+        results.dump(f)
+    
+    # 在控制台中打印测试报告
+    results.display(show_metadata=True)
+    
+    
 # =============================================================================
 # import pyperf
 # import pymysql
