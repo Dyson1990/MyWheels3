@@ -12,7 +12,7 @@ from pathlib import Path
 
 try:
     from . import db_cfg
-except:
+except Exception as e0:
     import requests
     import importlib.util
     import types
@@ -25,22 +25,29 @@ except:
     url = f'https://api.github.com/repos/{owner}/{repo}/contents/{module_p}'
     params = {'ref': branch} if branch else None
     headers = {'Accept': 'application/vnd.github.v3.raw'}
-    response = requests.get(url, params=params, headers=headers)
+    proxies = {'http': 'socks5://127.0.0.1:10808', 'https': 'socks5://127.0.0.1:10808'}
+    response = requests.get(url,params=params,headers=headers,proxies=proxies)
     source_code_raw = response.text
     spec = importlib.util.spec_from_loader("db_cfg", loader=None, origin="<string>")
     db_cfg = types.ModuleType(spec.name)
     exec(source_code_raw, db_cfg.__dict__)
     sys.modules[spec.name] = db_cfg
     globals()[spec.name] = db_cfg
-    logger.info("downloaded db_cfg.py from web")
+    logger.info(f"downloaded db_cfg.py from web, error: {e0}")
     
 databases = {
     'sqlite': peewee.SqliteDatabase,
     'mysql': peewee.MySQLDatabase,
     'postgresql': peewee.PostgresqlDatabase,
-    'oracle': peewee.OracleDatabase,
-    'sqlserver': peewee.SqlServerDatabase
 }
+
+class CustomDB(peewee.Database):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)  # 继承父类 Database 的初始化方法
+        
+        global databases
+        self.__class__ = type('CustomDB', (databases[kwargs['dialect']], CustomDB), {})
+
 
 if __name__ == '__main__':
     sql_args = {
@@ -52,7 +59,11 @@ if __name__ == '__main__':
         , 'dbname': 'test'
         , 'table_name': 'vote_record'
     }
-    print(db_cfg.DBConfig('MySQL', **sql_args).items())
+    cfg = db_cfg.DBConfig('MySQL', **sql_args)
+    cfg.fit_peewee()
+    
+    db = CustomDB(**cfg)
+    print(db)
 
 # # 定义 MySQL 数据库连接
 # # db = MySQLDatabase('mydatabase', user='myuser', password='mypassword',
