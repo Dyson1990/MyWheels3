@@ -32,7 +32,7 @@ import importlib.util
 #     # 在控制台中打印测试报告
 #     results.display(show_metadata=True)
 
-def faker_data(nrows):
+def faker_data(nrows=100):
     fake = Faker('zh_CN')
 
     for _ in range(nrows):

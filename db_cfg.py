@@ -5,13 +5,7 @@ Created on Mon Jun 26 16:14:25 2023
 @author: Weave
 """
 
-import sqlalchemy
-import sqlalchemy.orm
-import sqlalchemy.ext.automap
-import urllib.parse as urlparse
-
 from pathlib import Path
-from contextlib import closing
 from loguru import logger
 
 # 设计的还是有问题
@@ -149,7 +143,7 @@ class DBConfig(dict):
             
             if 'drivername' not in kwargs \
                 and {'dialect', 'driver'}.issubset(key_mapping.values()):
-                kwargs['drivername'] = f"{kwargs['dialect']}+{kwargs['driver']}"
+                kwargs['drivername'] = f"{kwargs['dialect']}+{kwargs['driver']}".lower()
                                        
             
         super().__init__(**kwargs)
