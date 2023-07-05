@@ -16,7 +16,14 @@ Created on Tue Jul  4 15:51:41 2023
 
 from loguru import logger
 from pathlib import Path
+import sys
 py_dir = Path(__file__).parent
+logger.configure(
+    handlers=[
+        # {"sink": "file.log", "format": "{time} {level} [{thread}] {message}"},
+        {"sink": sys.stdout, "format": "{time:MM-DD HH:mm:ss} {level} [{thread}] {message}"}
+    ]
+)
 
 import socket
 import threading
@@ -110,17 +117,37 @@ class ManagerThread(threading.Thread):
 
 # 定义函数，用于处理客户端请求
 def write_request(server_socket):
+    thread_id = threading.current_thread().ident
+    logger.info(f"线程{thread_id}：正在等待客户端连接...")
+    
 
     while True:
-        # 监听端口并处理请求
-        conn, addr = server_socket.accept()
-        # 读取客户端发送的数据
-        data = conn.recv(1024)
+        try:
+            # 监听端口并处理请求
+            conn, addr = server_socket.accept()
+            print(f"线程{thread_id}：客户端已连接:{addr}")
+            
+            while True:
+                request = conn.recv(1024)
+                if not request:
+                    break
+                else:
+                    print(f"线程{thread_id}：接受到请求:{request}")
+                    
+                # 返回状态码
+                conn.send(b"200")
+    
+            # 关闭连接
+            print(f"线程{thread_id}：完成传输，准备刷新")
+            conn.close()
+            # break
+        except Exception as e:
+            print("客户端连接异常:", e)
+            conn.close()
+            conn, addr = server_socket.accept()
+            print("客户端已重新连接:", addr)
         
-        if data is None:
-            break
         
-        print(data)
     # 根据请求类型进行处理
     # if data == b'get_status':
     #     status_code = 200
@@ -136,7 +163,7 @@ def write_request(server_socket):
     #     status_code = 400
     #     response_data = b'unsupported request type'
     # 发送响应
-    conn.sendall(str(200).encode())
+    # conn.sendall(str(200).encode())
     
 # 定义函数，用于处理客户端请求
 def read_request(server_socket):
