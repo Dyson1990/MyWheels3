@@ -17,6 +17,7 @@ class RemotePyCode():
         self.repo=repo
         self.source=source
         self.branch=branch
+        self.pycode_raw=None
         
         if self.source.lower() == "github": # 从GitHub API获取源代码并打包成字节码
             self.api_url = f'https://api.github.com/repos/{self.owner}/{self.repo}/contents/{{module_p}}'
@@ -25,29 +26,44 @@ class RemotePyCode():
         else:
             raise Exception(f"unknown source: {self.source}")
     
-    def create_module(self, module_p, module_name=''):
-        url = self.api_url.format(module_p=module_p)
+    def create_module(self, module_p, module_name='', version=None, v2ray=True):
+        # 如果指定了版本，构建带版本信息的 URL
+        url = self.api_url.format(module_p=module_p) + (f"?ref={version}" if version else "")
+        if v2ray:
+            proxies = {'http': 'socks5://127.0.0.1:10808'
+                       , 'https': 'socks5://127.0.0.1:10808'}
+        else:
+            proxies = None
         response = requests.get(url
                                 , params=self.params
                                 , headers=self.headers
+                                , proxies=proxies
                                )
-        self.pycode_raw = response.text
+        pycode_raw = response.text
+
+        if not pycode_raw:
+            raise Exception(f"empty remote python file.")
+
+        if not module_name:
+            module_name = module_p.split("/")[-1].split(".")[0]
         
-        # 创建规范
-        spec = importlib.util.spec_from_loader(module_name, loader=None, origin="<string>")
+        spec = importlib.util.spec_from_loader(module_name, loader=None, origin="<string>") # 创建规范
+        new_module = types.ModuleType(spec.name) # 创建新模块对象
         
-        # 创建新模块对象
-        new_module = types.ModuleType(spec.name)
-        
-        # 在新模块中执行 Python 代码
-        exec(self.pycode_raw, new_module.__dict__)
+        try:
+            exec(pycode_raw, new_module.__dict__) # 在新模块中执行 Python 代码
+        except Exception as e0:
+            logger.error(f"error in py code:{e0}\n{pycode_raw}")
+            return None
         
         # 将新模块添加到 sys.modules 字典中和全局命名空间中
         sys.modules[spec.name] = new_module
         globals()[spec.name] = new_module
+
+        # 为新对象增加一些常用属性
+        new_module.__script__ = pycode_raw 
         
-        # 返回新创建的模块对象
-        return new_module
+        return new_module # 返回新创建的模块对象
 
 if __name__ == "__main__":
     github_con = RemotePyCode()
