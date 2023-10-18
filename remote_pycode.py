@@ -11,6 +11,8 @@ import importlib.util
 import types
 import sys
 
+from loguru import logger
+
 class RemotePyCode():
     def __init__(self, source="github", owner="Dyson1990", repo="MyWheels3", branch=None):
         self.owner=owner
@@ -28,7 +30,12 @@ class RemotePyCode():
     
     def create_module(self, module_p, module_name='', version=None, v2ray=True):
         # 如果指定了版本，构建带版本信息的 URL
-        url = self.api_url.format(module_p=module_p) + (f"?ref={version}" if version else "")
+        if version:
+            url = self.api_url.format(module_p=module_p) + f"?ref={version}"
+        else:
+            url = self.api_url.format(module_p=module_p)
+            logger.warning("unknown version, may receive unwanted module!")
+        
         if v2ray:
             proxies = {'http': 'socks5://127.0.0.1:10808'
                        , 'https': 'socks5://127.0.0.1:10808'}
