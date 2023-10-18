@@ -111,7 +111,6 @@ def get_binary_image(url):
     global headers
     try:
         req = requests.get(url, headers=headers)
-        binary_img = base64.b64encode(req.text)
         return req.content
     except Exception as e0:
         logger.exception(e0)
