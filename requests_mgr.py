@@ -76,6 +76,9 @@ def get_html(url, **kwargs):
     return html
 
 def get_file(url, targetfile):
+    """
+    获取文件
+    """
     global headers
     from tqdm import tqdm
     # req = requests.get(url, headers=headers)
@@ -102,14 +105,16 @@ def get_file(url, targetfile):
     progress_bar.close()
         
 def get_binary_image(url):
+    """
+    获取二进制图片
+    """
     global headers
-    req = requests.get(url, headers=headers)
     try:
+        req = requests.get(url, headers=headers)
         binary_img = base64.b64encode(req.text)
-        return binary_img
+        return req.content
     except Exception as e0:
         logger.exception(e0)
-    
 
 
 if __name__ == '__main__':
