@@ -1,0 +1,37 @@
+# -*- coding: utf-8 -*-
+# app/config.yaml
+
+# ================= 应用基础配置 =================
+shutdown_timeout: 30  # 优雅关闭超时时间(秒)
+plugin_fail_policy: "isolate"  # 插件失败策略: isolate | terminate
+
+# ================= 服务器配置 =================
+server:
+  host: "0.0.0.0"  # 监听地址
+  port: 8000        # 监听端口
+
+# ================= 路由配置 =================
+routing:
+  mode: "mapping"  # 路由模式: default | mapping | custom
+  default_sender: "http"  # 默认发送器插件文件名
+  
+  # 映射模式配置 (仅当 mode=mapping 时生效)
+  mapping:
+    # - parser: "http"   # HTTP解析器 -> HTTP发送器
+    #   sender: "http"
+    - parser: "http"   # HTTP解析器 -> HTTP发送器
+      sender: "v2ray"
+    # - parser: "socks"  # 示例: SOCKS解析器 -> HTTP发送器
+    #   sender: "http"
+  
+  # 自定义模式配置 (预留)
+  custom: {}
+
+# ================= 插件配置示例 =================
+# 注意: 插件配置在插件文件中定义，此处仅为示例
+# http_parser:
+#   max_body_size: 2097152  # 2MB
+# 
+# http_sender:
+#   base_url: "https://api.example.com"
+#   retry_times: 5
