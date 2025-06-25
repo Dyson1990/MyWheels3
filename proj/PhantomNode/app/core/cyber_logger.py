@@ -25,7 +25,7 @@ import logging
 import sys
 from logging import Formatter, StreamHandler
 from utils.request_id import generate_request_id
-import os
+from pathlib import Path
 
 
 # 日志级别颜色映射
@@ -39,6 +39,11 @@ COLORS = {
 }
 
 log_level = "INFO"
+log_p = Path(__file__).parent.parent.joinpath("logs/process.log")
+logging.basicConfig(level=logging.INFO
+                    , filename=log_p.as_posix()
+                    , encoding='utf-8'
+                    )
 
 class CyberFormatter(Formatter):
     """赛博风格日志格式化器"""
