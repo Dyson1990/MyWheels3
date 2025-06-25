@@ -27,7 +27,7 @@ def proj_trace(file_path, func_name, **kwargs):
         # 确保只有一个文件处理器
         if not trace_logger.handlers:
             # 创建文件处理器
-            file_handler = logging.FileHandler("process.log", mode="a", encoding="utf-8")
+            file_handler = logging.FileHandler("trace.log", mode="a", encoding="utf-8")
             
             # 设置日志格式
             formatter = logging.Formatter('[%(asctime)s] [%(levelname)s] %(message)s')

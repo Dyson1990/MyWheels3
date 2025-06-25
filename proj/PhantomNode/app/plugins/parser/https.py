@@ -45,7 +45,7 @@ class Https:
         "allowed_methods": [        # 允许的HTTP方法
             "GET", "POST", "PUT", 
             "DELETE", "PATCH", "HEAD",
-            "OPTIONS"
+            "OPTIONS", "CONNECT"
         ]
     }
     

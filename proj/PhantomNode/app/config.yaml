@@ -12,14 +12,16 @@ server:
 
 # ================= 路由配置 =================
 routing:
-  mode: "mapping"  # 路由模式: default | mapping | custom
-  default_sender: "http"  # 默认发送器插件文件名
+  mode: "default"  # 路由模式: default | mapping | custom
+  default_sender: "v2ray"  # 默认发送器插件文件名
   
   # 映射模式配置 (仅当 mode=mapping 时生效)
   mapping:
     # - parser: "http"   # HTTP解析器 -> HTTP发送器
     #   sender: "http"
     - parser: "http"   # HTTP解析器 -> HTTP发送器
+      sender: "v2ray"
+    - parser: "https"   # HTTP解析器 -> HTTP发送器
       sender: "v2ray"
     # - parser: "socks"  # 示例: SOCKS解析器 -> HTTP发送器
     #   sender: "http"

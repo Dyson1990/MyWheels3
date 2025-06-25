@@ -145,9 +145,14 @@ if __name__ == "__main__":
     
     # 启动服务
     logger.info(f"🌐 启动服务: http://{host}:{port}")
-    uvicorn.run(
-        app, 
-        host=host, 
-        port=port,
-        log_config=None  # 使用自定义日志配置
-    )
+
+    # 服务器配置
+    server_config = {
+        "app": app,
+        "host": host,
+        "port": port,
+        "log_config": None,
+        # "timeout_keep_alive": 60
+    }
+
+    uvicorn.run(**server_config)
