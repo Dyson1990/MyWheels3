@@ -72,7 +72,7 @@ def load_parser_plugin(plugin_file: str):
         
         # 实例化插件
         instance = plugin_class()
-        logger.info(f"🆕 创建解析器实例: {class_name}")
+        logger.info(f"🆕 创建解析器实例: {instance.__class__}")
         return instance
     
     except ImportError as e:

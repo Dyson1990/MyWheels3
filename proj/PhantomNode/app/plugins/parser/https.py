@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
-# app/plugins/parser/http.py
+# app/plugins/parser/https.py
 """
-HTTP 协议解析器插件
-负责将HTTP请求转换为统一格式
+HTTPS 协议解析器插件
+负责将HTTPS请求转换为统一格式
 
 功能说明:
-1. 解析FastAPI的HTTP请求
+1. 解析FastAPI的HTTPS请求
 2. 转换为BaseRequest统一格式
 3. 处理请求体和头部信息
-4. 支持配置参数：超时时间、最大请求体大小等
+4. 支持配置参数：超时时间、最大请求体大小、SSL证书等
 5. 向FastAPI注册路由
 
 依赖模块:
@@ -21,9 +21,10 @@ HTTP 协议解析器插件
 - 请求体大小限制
 - 支持所有HTTP方法
 - 自动处理路径参数
+- 支持SSL/TLS加密
 
 作者: Dyson1990 (GitHub: https://github.com/Dyson1990)
-创建时间: 2025-06-15 17:20:00
+更新时间: 2025-06-25
 """
 
 from fastapi import Request
@@ -31,30 +32,40 @@ from core.base import BaseRequest
 from core.cyber_logger import logger
 from utils.proj_trace import proj_trace
 
-class Http:
-    """HTTP解析器插件"""
+class Https:
+    """HTTPS解析器插件"""
     
-    # 默认配置参数
+    # 更新配置参数（添加SSL相关）
     DEFAULT_CONFIG = {
-        "port": 8080,               # 监听端口
-        "timeout": 30,               # 请求超时时间（秒）
-        "max_body_size": 1048576,    # 最大请求体大小（1MB）
-        "allowed_methods": [         # 允许的HTTP方法
+        "port": 8443,               # HTTPS默认端口
+        "timeout": 30,              # 请求超时时间（秒）
+        "max_body_size": 1048576,   # 最大请求体大小（1MB）
+        "ssl_certfile": None,       # SSL证书文件路径
+        "ssl_keyfile": None,        # SSL私钥文件路径
+        "allowed_methods": [        # 允许的HTTP方法
             "GET", "POST", "PUT", 
             "DELETE", "PATCH", "HEAD",
             "OPTIONS"
         ]
     }
     
-    def __init__(self):
-        """初始化解析器，使用默认配置"""
-        proj_trace("app/plugins/parser/http.py", "Http.__init__")
+    def __init__(self, ssl_certfile=None, ssl_keyfile=None):
+        """初始化解析器，支持SSL配置"""
+        proj_trace("app/plugins/parser/https.py", "HttpsParser.__init__")
         self.config = self.DEFAULT_CONFIG.copy()
-        logger.info(f"🆕 HTTP解析器初始化完成，配置: {self.config}")
-    
+        
+        # 注入SSL配置
+        if ssl_certfile:
+            self.config["ssl_certfile"] = ssl_certfile
+        if ssl_keyfile:
+            self.config["ssl_keyfile"] = ssl_keyfile
+            
+        ssl_enabled = bool(ssl_certfile and ssl_keyfile)
+        logger.info(f"🆕 HTTPS解析器初始化完成 | 端口: {self.config['port']} | SSL: {'启用' if ssl_enabled else '禁用'}")
+
     async def parse_request(self, raw_request: Request) -> BaseRequest:
         """
-        解析原始HTTP请求为统一格式
+        解析原始HTTPS请求为统一格式
         
         参数:
             raw_request: FastAPI请求对象
@@ -65,9 +76,9 @@ class Http:
         异常:
             ValueError: 如果请求体超过最大限制
         """
-        proj_trace("app/plugins/parser/http.py", "Http.parse_request", raw_request=raw_request)
-        # 记录请求信息
-        logger.debug(f"🌐 解析HTTP请求: {raw_request.method} {raw_request.url}")
+        proj_trace("app/plugins/parser/https.py", "HttpsParser.parse_request", raw_request=raw_request)
+        # 记录请求信息（明确HTTPS协议）
+        logger.debug(f"🔒 解析HTTPS请求: {raw_request.method} {raw_request.url}")
         
         # 检查HTTP方法是否允许
         if raw_request.method not in self.config["allowed_methods"]:
@@ -96,12 +107,12 @@ class Http:
             body=body
         )
         
-        logger.debug(f"📦 HTTP请求解析完成: {base_request}")
+        logger.debug(f"📦 HTTPS请求解析完成: {base_request}")
         return base_request
     
     def register_routes(self, app, handler):
         """
-        向FastAPI应用注册路由
+        向FastAPI应用注册HTTPS路由
         
         参数:
             app: FastAPI应用实例
@@ -111,7 +122,7 @@ class Http:
         - 创建动态路由处理所有路径
         - 支持配置中定义的所有HTTP方法
         """
-        proj_trace("app/plugins/parser/http.py", "Http.register_routes", app=app, handler=handler)
+        proj_trace("app/plugins/parser/https.py", "HttpsParser.register_routes", app=app, handler=handler)
         # 获取允许的方法
         methods = self.config["allowed_methods"]
         
@@ -119,20 +130,21 @@ class Http:
         @app.api_route(
             "/{path:path}",
             methods=methods,
-            summary="HTTP代理端点",
-            description="处理所有HTTP请求的代理端点",
-            tags=["HTTP代理"]
+            summary="HTTPS代理端点",
+            description="处理所有HTTPS请求的代理端点",
+            tags=["HTTPS代理"]
         )
         async def proxy_endpoint(request: Request, path: str):
             """
-            HTTP代理端点
-            处理所有传入的HTTP请求
+            HTTPS代理端点
+            处理所有传入的HTTPS请求
             
             参数:
                 request: FastAPI请求对象
                 path: URL路径
             """
-            proj_trace("app/plugins/parser/http.py", "proxy_endpoint", request=request, path=path)
+            proj_trace("app/plugins/parser/https.py", "proxy_endpoint", request=request, path=path)
             return await handler(request)
         
-        logger.info(f"🔗 注册HTTP路由: /{{path:path}} (方法: {methods})")
+        ssl_enabled = bool(self.config['ssl_certfile'] and self.config['ssl_keyfile'])
+        logger.info(f"🔗 注册HTTPS路由: /{{path:path}} | 方法: {methods} | SSL: {'启用' if ssl_enabled else '禁用'}")

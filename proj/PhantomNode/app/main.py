@@ -40,7 +40,7 @@ sys.path.insert(0, str(BASE_DIR))
 from fastapi import FastAPI
 from core.schedule import Dispatcher
 from core.config_mgr import config_manager
-from core.cyber_logger import logger
+from core.cyber_logger import logger, log_p
 
 # 导入uvicorn用于启动服务器
 import uvicorn
@@ -105,7 +105,7 @@ async def shutdown():
     if dispatcher:
         logger.info("🛑 开始关闭应用...")
         await dispatcher.close()
-        logger.info("✅ 应用已关闭")
+        logger.info("✅ 应用已关闭")        
 
 @app.on_event("startup")
 async def app_startup():

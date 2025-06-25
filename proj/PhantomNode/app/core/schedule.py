@@ -26,6 +26,7 @@ from .plugin_loader import load_parser_plugin, load_sender_plugin
 from utils.request_id import generate_request_id
 from .config_mgr import config_manager
 from .cyber_logger import logger
+from pathlib import Path
 from utils.proj_trace import proj_trace
 
 class Dispatcher:
@@ -56,9 +57,6 @@ class Dispatcher:
         config = config_manager.config
         routing = config["routing"]
         
-        # 收集所有需要加载的解析器插件
-        parser_files = set()
-        
         # 收集所有需要加载的发送器插件
         sender_files = set()
         
@@ -69,7 +67,7 @@ class Dispatcher:
         # 映射模式中的插件
         if routing["mode"] == "mapping":
             for mapping in routing["mapping"]:
-                parser_files.add(mapping["parser"])
+                # parser_files.add(mapping["parser"])
                 sender_files.add(mapping["sender"])
         
         # 自定义模式中的插件（预留）
@@ -77,15 +75,26 @@ class Dispatcher:
             # 这里可以添加自定义模式需要的插件
             pass
         
-        # 加载解析器插件
-        for plugin_file in parser_files:
+        # 加载所有解析器插件
+        
+        parser_paths = set(Path(__file__)
+                           .parent
+                           .joinpath("../plugins/parser")
+                           .glob("*")
+                           )
+        for plugin_p in parser_paths:
+            f_name = plugin_p.stem
+            
+            if f_name in ("__init__", "__pycache__"):
+                continue
+            
             try:
-                self.parsers[plugin_file] = load_parser_plugin(plugin_file)
-                logger.info(f"✅ 加载解析器插件: {plugin_file}")
+                self.parsers[f_name] = load_parser_plugin(f_name)
+                logger.info(f"✅ 加载解析器插件: {f_name}")
             except Exception as e:
-                logger.error(f"❌ 加载解析器插件失败 {plugin_file}: {str(e)}")
+                logger.error(f"❌ 加载解析器插件失败 {f_name}: {str(e)}")
                 if config_manager.should_terminate_on_plugin_fail():
-                    raise RuntimeError(f"解析器插件加载失败: {plugin_file}")
+                    raise RuntimeError(f"解析器插件加载失败: {f_name}")
         
         # 加载发送器插件
         for plugin_file in sender_files:
