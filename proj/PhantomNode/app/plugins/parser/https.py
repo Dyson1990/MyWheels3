@@ -31,6 +31,8 @@ from fastapi import Request
 from core.base import BaseRequest
 from core.cyber_logger import logger
 from utils.proj_trace import proj_trace
+import ssl
+import os
 
 class Https:
     """HTTPS解析器插件"""
@@ -51,7 +53,7 @@ class Https:
     
     def __init__(self, ssl_certfile=None, ssl_keyfile=None):
         """初始化解析器，支持SSL配置"""
-        proj_trace("app/plugins/parser/https.py", "HttpsParser.__init__")
+        proj_trace("app/plugins/parser/https.py", "Https.__init__")
         self.config = self.DEFAULT_CONFIG.copy()
         
         # 注入SSL配置
@@ -76,7 +78,7 @@ class Https:
         异常:
             ValueError: 如果请求体超过最大限制
         """
-        proj_trace("app/plugins/parser/https.py", "HttpsParser.parse_request", raw_request=raw_request)
+        proj_trace("app/plugins/parser/https.py", "Https.parse_request", raw_request=raw_request)
         # 记录请求信息（明确HTTPS协议）
         logger.debug(f"🔒 解析HTTPS请求: {raw_request.method} {raw_request.url}")
         
@@ -122,7 +124,7 @@ class Https:
         - 创建动态路由处理所有路径
         - 支持配置中定义的所有HTTP方法
         """
-        proj_trace("app/plugins/parser/https.py", "HttpsParser.register_routes", app=app, handler=handler)
+        proj_trace("app/plugins/parser/https.py", "Https.register_routes", app=app, handler=handler)
         # 获取允许的方法
         methods = self.config["allowed_methods"]
         
@@ -148,3 +150,24 @@ class Https:
         
         ssl_enabled = bool(self.config['ssl_certfile'] and self.config['ssl_keyfile'])
         logger.info(f"🔗 注册HTTPS路由: /{{path:path}} | 方法: {methods} | SSL: {'启用' if ssl_enabled else '禁用'}")
+        
+        # 关键修复：添加CONNECT方法支持
+        @app.route("/", methods=["CONNECT"])
+        async def connect_handler(request: Request):
+            """
+            处理CONNECT请求（HTTPS隧道）
+            """
+            proj_trace("app/plugins/parser/https.py", "connect_handler", request=request)
+            logger.info(f"🔒 处理CONNECT请求: {request.method} {request.url}")
+            
+            # 创建虚拟请求对象
+            base_request = BaseRequest(
+                method="CONNECT",
+                url=str(request.url),
+                headers=dict(request.headers),
+                params=dict(request.query_params),
+                body=None
+            )
+            
+            # 调用处理函数
+            return await handler(base_request)
