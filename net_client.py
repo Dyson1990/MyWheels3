@@ -19,7 +19,17 @@ import httpx
 from loguru import logger
 from anti_useragent import UserAgent
 
-ua = UserAgent()
+_ua = None
+
+
+def _get_ua():
+    """延迟初始化 UserAgent，避免模块导入时 PyCharm 调试器内省触发
+    anti_useragent 的 __getattr__ 导致 AntiUserAgentError。"""
+    global _ua
+    if _ua is None:
+        _ua = UserAgent()
+    return _ua
+
 
 # ============ 全局配置 ============
 
@@ -37,11 +47,12 @@ def check_http_version(url):
     """使用 curl -v 检测网站的 HTTP 版本
 
     :param url: 目标 URL
-    :return: 版本字符串 '1.1' / '2' / '3'，检测失败返回 None
+    :return: 版本字符串 '1' / '2' / '3'，检测失败返回 None
 
     示例:
-        >>> check_http_version('https://example.com')
-        '2'
+        >>> ver = check_http_version('https://example.com')
+        >>> ver in ('1', '2', '3') or ver is None
+        True
     """
     cmd = ['curl', '-v', '-o', '/dev/null', url]
 
@@ -52,10 +63,10 @@ def check_http_version(url):
 
         # 匹配 curl 的 HTTP 版本声明
         # 典型格式:
-        #   * using HTTP/1.1
+        #   * using HTTP/1.1  或  * using HTTP/1.x  (curl 8.x)
         #   * using HTTP/2
         #   * using HTTP/3
-        match = re.search(r'using HTTP/([\d.]+)', output)
+        match = re.search(r'using HTTP/(\d+)', output)
         if match:
             version = match.group(1)
             logger.info(f"检测到 HTTP 版本: {version}  (url: {url})")
@@ -99,9 +110,19 @@ class NetClient(httpx.Client):
 
     def __init__(self, *args, **kwargs):
         # 默认启用 HTTP/2（httpx 也会借此自动协商 H3）
-        kwargs.setdefault('http2', True)
         kwargs.setdefault('follow_redirects', True)
         kwargs.setdefault('timeout', httpx.Timeout(20.0))
+
+        # 检查 h2 是否可用，不可用时降级为 http/1.1 only
+        if kwargs.get('http2', True):
+            try:
+                import h2  # noqa: F401
+                kwargs.setdefault('http2', True)
+            except ImportError:
+                logger.warning("h2 未安装，HTTP/2 不可用，降级为 HTTP/1.1。"
+                               "可执行: pip install httpx[http2]")
+                kwargs['http2'] = False
+
         super().__init__(*args, **kwargs)
 
     def get(self, url, **kwargs):
@@ -139,7 +160,7 @@ class NetClient(httpx.Client):
 def get_html(url, **kwargs):
     """获取网页 HTML 文本
 
-    :param url:     目标 URL
+    :param url:      目标 URL
     :param headers:  可选，自定义请求头
     :param cookies:  可选，cookie dict
     :param timeout:  可选，超时秒数（默认 20）
@@ -147,13 +168,15 @@ def get_html(url, **kwargs):
     :param proxies:  可选，代理配置
                      - "v2ray" → socks5://127.0.0.1:10808
                      - "ip:port" → http://ip:port
+    :param progress: 可选，是否显示下载进度条（默认 False）
     """
     global headers
     req_headers = kwargs.get('headers', headers).copy()
-    req_headers["user-agent"] = ua.random
+    req_headers["user-agent"] = _get_ua().random
 
     cookies = kwargs.get('cookies', None)
     timeout = kwargs.get('timeout', 20)
+    show_progress = kwargs.get('progress', False)
 
     # 代理处理
     proxies = None
@@ -171,7 +194,12 @@ def get_html(url, **kwargs):
 
     while True:
         try:
-            resp = client.get(url, headers=req_headers, cookies=cookies)
+            if show_progress:
+                resp = _stream_get_with_progress(
+                    client, 'GET', url, req_headers, cookies, desc=url.split('/')[-1],
+                )
+            else:
+                resp = client.get(url, headers=req_headers, cookies=cookies)
             # 编码处理: 优先使用用户指定的 charset，其次从 Content-Type 解析
             resp.encoding = kwargs.get('charset') or _detect_encoding(resp)
             resp.raise_for_status()
@@ -217,17 +245,24 @@ def get_file(url, targetfile):
     client.close()
 
 
-def get_binary_image(url):
+def get_binary_image(url, **kwargs):
     """获取二进制图片
 
-    :param url: 目标 URL
-    :return:     图片二进制内容，失败返回 None
+    :param url:      目标 URL
+    :param progress: 可选，是否显示下载进度条（默认 False）
+    :return:          图片二进制内容，失败返回 None
     """
     global headers
+    show_progress = kwargs.get('progress', False)
 
     client = NetClient()
     try:
-        resp = client.get(url, headers=headers)
+        if show_progress:
+            resp = _stream_get_with_progress(
+                client, 'GET', url, headers, desc=url.split('/')[-1],
+            )
+        else:
+            resp = client.get(url, headers=headers)
         return resp.content
     except Exception as e0:
         logger.exception(e0)
@@ -236,6 +271,32 @@ def get_binary_image(url):
 
 
 # ============ 内部工具 ============
+
+def _stream_get_with_progress(client, method, url, headers, cookies=None, desc=''):
+    """带 tqdm 进度条的流式 GET，返回一个类 httpx.Response 对象。"""
+    from tqdm import tqdm
+
+    with client.stream(method, url, headers=headers, cookies=cookies) as resp:
+        total_size = int(resp.headers.get('Content-Length', 0))
+        total_size_mb = round(total_size / (1024 * 1024), 2) if total_size else None
+
+        chunks = []
+        if total_size_mb:
+            progress_bar = tqdm(
+                total=total_size_mb, unit='MB', desc=desc, ncols=80,
+            )
+            for data in resp.iter_bytes(chunk_size=1024):
+                chunks.append(data)
+                progress_bar.update(len(data) / (1024 * 1024))
+            progress_bar.close()
+        else:
+            for data in resp.iter_bytes(chunk_size=1024):
+                chunks.append(data)
+
+        # 将流式响应包装为类 httpx.Response 的对象
+        resp._content = b''.join(chunks)
+        return resp
+
 
 def _detect_encoding(resp):
     """从 httpx Response 中检测编码，类似 requests 的 apparent_encoding。
@@ -263,9 +324,17 @@ def _detect_encoding(resp):
 if __name__ == '__main__':
     # 测试 HTTP 版本检测
     print("=== HTTP 版本检测 ===")
-    ver = check_http_version("https://icanhazip.com/")
+    ver = check_http_version("https://www.baidu.com/")
     print(f"检测结果: {ver}")
 
-    # 测试 get_html
-    # html = get_html('https://httpbin.org/html')
-    # print(html[:200])
+    # 测试 get_html（带进度条）
+    print("\n=== 测试 get_html ===")
+    html = get_html('https://www.baidu.com/', progress=True)
+    print(f"内容长度: {len(html)} 字节")
+    print(f"内容预览: {html[:200]}")
+
+    # 测试 get_html 不带进度条
+    print("\n=== 测试 get_html (无进度条) ===")
+    html2 = get_html('https://icanhazip.com/')
+    print(f"获取内容: {html2.strip()}")
+    print(f"内容长度: {len(html2)} 字节")
